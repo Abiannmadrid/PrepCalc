@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { FiInfo, FiDroplet, FiTrash2 } from "react-icons/fi";
+import { FaSyringe } from "react-icons/fa";
 
-/* ---------- Tooltip component (solid white box, hover/click) ---------- */
+/* ---------- Tooltip component (hybrid dark mode) ---------- */
 function Tooltip({ text }) {
   const [visible, setVisible] = useState(false);
 
@@ -18,29 +19,18 @@ function Tooltip({ text }) {
       aria-expanded={visible}
     >
       <FiInfo
-        className="cursor-pointer text-gray-400 hover:text-blue-600 transition"
+        className="cursor-pointer text-gray-400 hover:text-indigo-400 transition"
         aria-label="More info"
-        role="button"
-        tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") setVisible((v) => !v);
-        }}
       />
 
       {visible && (
-        <div
-          className="absolute z-[9999] top-full left-1/2 transform -translate-x-1/2 mt-3"
-          style={{ pointerEvents: "auto" }}
-        >
-          {/* solid white tooltip box */}
+        <div className="absolute z-[9999] top-full left-1/2 transform -translate-x-1/2 mt-3 pointer-events-auto">
+          {/* hybrid tooltip box */}
           <div
-            className="text-black text-base font-medium rounded-xl shadow-2xl border border-gray-300 px-5 py-4 text-center max-w-xs sm:max-w-sm md:max-w-md break-words"
+            className="text-white text-sm font-medium rounded-xl shadow-2xl border border-gray-600 px-6 py-4 text-center max-w-xs break-words"
             style={{
-              backgroundColor: "#ffffff", // solid white
-              opacity: 1,
-              backdropFilter: "none",
-              WebkitBackdropFilter: "none",
-              color: "#000000", // ensure black text
+              backgroundColor: "rgba(30, 30, 35, 0.95)", // dark semi-transparent
+              color: "#ffffff",
             }}
           >
             {text}
@@ -48,8 +38,8 @@ function Tooltip({ text }) {
 
           {/* small triangle pointer */}
           <div
-            className="absolute top-[-6px] left-1/2 transform -translate-x-1/2 w-3 h-3 border-l border-t border-gray-300 rotate-45"
-            style={{ backgroundColor: "#ffffff" }}
+            className="absolute top-[-6px] left-1/2 transform -translate-x-1/2 w-3 h-3 border-l border-t border-gray-600 rotate-45"
+            style={{ backgroundColor: "rgba(30, 30, 35, 0.95)" }}
           ></div>
         </div>
       )}
@@ -102,18 +92,16 @@ export default function App() {
       return;
     }
 
-    // Ensure units are compatible
     const vialIsMass = massUnits.has(vialUnit);
     const desiredIsMass = massUnits.has(desiredUnit);
     const vialIsElectro = electrolyteUnits.has(vialUnit);
     const desiredIsElectro = electrolyteUnits.has(desiredUnit);
 
     if (!( (vialIsMass && desiredIsMass) || (vialIsElectro && desiredIsElectro) )) {
-      setError("Unit mismatch — use mass units with mass (mg/g/mcg) or mmol/mEq with mmol/mEq.");
+      setError("Unit mismatch — use mass units with mass or mmol/mEq with mmol/mEq.");
       return;
     }
 
-    // Convert to base units for calculation
     let vialInBase = vialS;
     let desiredInBase = desired;
     let baseLabel = desiredUnit;
@@ -125,10 +113,10 @@ export default function App() {
       if (desiredUnit === "mcg") desiredInBase /= 1000;
       baseLabel = "mg";
     } else {
-      baseLabel = desiredUnit; // mmol or meq
+      baseLabel = desiredUnit;
     }
 
-    const concentration = vialInBase / vialV; // base units per mL
+    const concentration = vialInBase / vialV;
     if (!isFinite(concentration) || concentration <= 0) {
       setError("Calculated concentration is invalid — check vial strength and reference volume.");
       return;
@@ -148,51 +136,43 @@ export default function App() {
       return;
     }
 
-    // round to nearest tenth
     const rounded = Math.round(volumeToDraw * 10) / 10;
     setResult({ volume: rounded, unit: "mL" });
   };
 
-  // input invalid flags
   const vialStrengthInvalid = vialStrength !== "" && isNaN(Number(vialStrength));
   const vialVolumeInvalid = vialVolume !== "" && (isNaN(Number(vialVolume)) || Number(vialVolume) <= 0);
   const desiredStrengthInvalid = desiredStrength !== "" && isNaN(Number(desiredStrength));
 
   const inputClass = (invalid) =>
     `w-full rounded-xl p-3 transition focus:outline-none focus:ring-2 ${
-      invalid ? "border-red-400 ring-red-200" : "border-gray-200 ring-indigo-200"
-    } border`;
+      invalid ? "border-red-600 ring-red-300" : "border-gray-600 ring-indigo-400"
+    } border bg-gray-900 text-white`;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-indigo-100 to-indigo-50 p-6">
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-gray-900 p-6 text-white">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <header className="mb-6">
           <div className="flex items-center justify-between gap-4">
-            <div>
-              <h1 className="text-4xl font-extrabold text-indigo-700 flex items-center gap-3">
-                <span className="inline-block w-10 h-10 bg-gradient-to-br from-indigo-300 to-indigo-500 rounded-xl shadow-md flex items-center justify-center text-white">
-                  💧
-                </span>
-                PrepCalc
-              </h1>
-              <p className="text-sm text-gray-600 mt-1">dosing calculator</p>
+            <div className="flex items-center gap-3">
+              <FaSyringe className="text-indigo-400 w-10 h-10" />
+              <h1 className="text-4xl font-extrabold text-indigo-300">PrepCalc</h1>
             </div>
+            <p className="text-sm text-gray-400 mt-1">Dosing calculator</p>
           </div>
         </header>
 
-        {/* Two-column responsive grid */}
+        {/* Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-          {/* LEFT: Inputs card */}
-          <section className="bg-white/90 backdrop-blur-sm border border-indigo-50 rounded-2xl shadow-lg p-6">
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">Inputs</h2>
+          {/* Inputs */}
+          <section className="bg-gray-800/90 backdrop-blur-sm border border-gray-700 rounded-2xl shadow-lg p-6">
+            <h2 className="text-lg font-semibold text-gray-200 mb-4">Inputs</h2>
 
-            {/* Vial strength */}
             <div className="mb-4">
-              <label className="flex items-center gap-2 text-gray-700 font-medium mb-1">
-                <FiDroplet className="text-indigo-500" />
-                <span>Vial Strength</span>
-                <Tooltip text="Strength listed on the vial (the amount of active in the reference volume), e.g. 125 mg" />
+              <label className="flex items-center gap-2 text-gray-200 font-medium mb-1">
+                <FiDroplet className="text-indigo-400" /> Vial Strength
+                <Tooltip text="Strength listed on the vial (e.g., 125 mg)" />
               </label>
               <div className="flex gap-3 mt-2">
                 <input
@@ -202,28 +182,22 @@ export default function App() {
                   placeholder="e.g. 125"
                   value={vialStrength}
                   onChange={(e) => setVialStrength(e.target.value)}
-                  aria-invalid={vialStrengthInvalid}
                 />
                 <select
-                  className="rounded-xl p-3 border border-gray-200 focus:outline-none"
+                  className="rounded-xl p-3 border border-gray-600 bg-gray-900 text-white focus:outline-none"
                   value={vialUnit}
                   onChange={(e) => setVialUnit(e.target.value)}
                 >
-                  {unitOptions.map((u) => (
-                    <option key={u} value={u}>
-                      {u}
-                    </option>
-                  ))}
+                  {unitOptions.map(u => <option key={u} value={u}>{u}</option>)}
                 </select>
               </div>
-              {vialStrengthInvalid && <p className="text-red-600 text-sm mt-2">Enter a valid number.</p>}
+              {vialStrengthInvalid && <p className="text-red-500 text-sm mt-2">Enter a valid number.</p>}
             </div>
 
-            {/* Vial reference volume */}
             <div className="mb-4">
-              <label className="flex items-center gap-2 text-gray-700 font-medium mb-1">
+              <label className="flex items-center gap-2 text-gray-200 font-medium mb-1">
                 Vial Reference Volume (mL per)
-                <Tooltip text="How many mL the vial strength applies to, e.g. 2 for '125 mg / 2 mL'." />
+                <Tooltip text="How many mL the vial strength applies to, e.g. 2 for 125 mg / 2 mL" />
               </label>
               <input
                 className={inputClass(vialVolumeInvalid)}
@@ -232,16 +206,14 @@ export default function App() {
                 placeholder="e.g. 2"
                 value={vialVolume}
                 onChange={(e) => setVialVolume(e.target.value)}
-                aria-invalid={vialVolumeInvalid}
               />
-              {vialVolumeInvalid && <p className="text-red-600 text-sm mt-2">Enter a positive number.</p>}
+              {vialVolumeInvalid && <p className="text-red-500 text-sm mt-2">Enter a positive number.</p>}
             </div>
 
-            {/* Desired dose */}
             <div className="mb-4">
-              <label className="flex items-center gap-2 text-gray-700 font-medium mb-1">
+              <label className="flex items-center gap-2 text-gray-200 font-medium mb-1">
                 Desired Dose
-                <Tooltip text="Total amount you want in the bag (e.g. 50 mg or 6 mmol)." />
+                <Tooltip text="Total amount you want in the bag (e.g. 50 mg or 6 mmol)" />
               </label>
               <div className="flex gap-3 mt-2">
                 <input
@@ -251,67 +223,57 @@ export default function App() {
                   placeholder="e.g. 50"
                   value={desiredStrength}
                   onChange={(e) => setDesiredStrength(e.target.value)}
-                  aria-invalid={desiredStrengthInvalid}
                 />
                 <select
-                  className="rounded-xl p-3 border border-gray-200 focus:outline-none"
+                  className="rounded-xl p-3 border border-gray-600 bg-gray-900 text-white focus:outline-none"
                   value={desiredUnit}
                   onChange={(e) => setDesiredUnit(e.target.value)}
                 >
-                  {unitOptions.map((u) => (
-                    <option key={u} value={u}>
-                      {u}
-                    </option>
-                  ))}
+                  {unitOptions.map(u => <option key={u} value={u}>{u}</option>)}
                 </select>
               </div>
-              {desiredStrengthInvalid && <p className="text-red-600 text-sm mt-2">Enter a valid number.</p>}
+              {desiredStrengthInvalid && <p className="text-red-500 text-sm mt-2">Enter a valid number.</p>}
             </div>
 
-            {/* Buttons */}
             <div className="flex gap-3 mt-4">
               <button
                 onClick={calculateVolume}
-                className="flex-1 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white font-semibold py-3 rounded-xl shadow-md hover:from-indigo-600 hover:to-indigo-700 transition"
-                aria-label="Calculate volume"
+                className="flex-1 bg-gradient-to-br from-indigo-500 to-indigo-600 text-white font-semibold py-3 rounded-xl shadow-lg hover:from-indigo-600 hover:to-indigo-700 transition"
               >
                 Calculate
               </button>
-
               <button
                 onClick={resetAll}
-                className="flex-none bg-white border border-gray-200 text-gray-700 py-3 px-4 rounded-xl hover:bg-gray-50 flex items-center gap-2"
-                aria-label="Reset form"
-                title="Reset all fields"
+                className="flex-none bg-gray-900 border border-gray-600 text-gray-300 py-3 px-4 rounded-xl hover:bg-gray-800 flex items-center gap-2"
               >
                 <FiTrash2 /> Reset
               </button>
             </div>
           </section>
 
-          {/* RIGHT: Result card */}
-          <aside className="bg-white/95 border border-indigo-50 rounded-2xl shadow-lg p-6 flex flex-col justify-center items-center">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">Result</h3>
+          {/* Result */}
+          <aside className="bg-gray-800/95 border border-indigo-700 rounded-2xl shadow-lg p-6 flex flex-col justify-center items-center">
+            <h3 className="text-lg font-semibold text-gray-200 mb-2">Result</h3>
 
             {error ? (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 w-full text-center">
-                <p className="text-red-700 font-medium">{error}</p>
+              <div className="bg-red-900 border border-red-600 rounded-lg p-4 w-full text-center">
+                <p className="text-red-400 font-medium">{error}</p>
               </div>
             ) : result ? (
-              <div className="bg-gradient-to-br from-white to-indigo-50 border border-indigo-100 rounded-lg p-6 w-full text-center">
-                <p className="text-sm text-gray-600">Volume to draw</p>
-                <p className="text-3xl font-extrabold text-indigo-700 mt-2">
+              <div className="w-full text-center p-6 rounded-2xl border border-indigo-600"
+              style={{ background: "linear-gradient(145deg, #1f1f23, #2e2e41)" }}>
+                <p className="text-sm text-gray-400">Volume to draw</p>
+                <p className="text-3xl font-extrabold text-indigo-400 mt-2">
                   {result.volume} {result.unit}
                 </p>
                 <p className="text-xs text-gray-500 mt-2">Rounded to nearest 0.1 mL</p>
               </div>
             ) : (
-              <div className="text-center text-gray-500">Enter inputs and press Calculate</div>
+              <div className="text-center text-gray-400">Enter inputs and press Calculate</div>
             )}
           </aside>
         </div>
 
-        {/* Footer */}
         <footer className="mt-6 text-xs text-gray-500 text-center">
           Non-clinical demo — verify calculations before clinical use.
         </footer>
@@ -319,6 +281,7 @@ export default function App() {
     </div>
   );
 }
+
 
 
 
