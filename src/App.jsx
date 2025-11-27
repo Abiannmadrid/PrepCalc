@@ -1,4 +1,83 @@
 import { useState } from "react";
+
+/* ---------- Pahtia Labs Logo Component ---------- */
+function PahtiaLogo({ size = "md" }) {
+  const sizes = {
+    sm: { hex: 20, text: 16, spacing: 28 },
+    md: { hex: 30, text: 24, spacing: 42 },
+    lg: { hex: 40, text: 32, spacing: 56 }
+  };
+  
+  const s = sizes[size];
+  
+  return (
+    <div className="flex items-center gap-3">
+      {/* Benzene Ring Icon */}
+      <svg width={s.hex} height={s.hex} viewBox="0 0 100 100" className="flex-shrink-0">
+        <defs>
+          <linearGradient id="hexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style={{stopColor:"#818cf8"}} />
+            <stop offset="100%" style={{stopColor:"#a78bfa"}} />
+          </linearGradient>
+          <linearGradient id="aztecGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style={{stopColor:"#3b82f6"}} />
+            <stop offset="100%" style={{stopColor:"#06b6d4"}} />
+          </linearGradient>
+        </defs>
+        
+        {/* Outer hexagon */}
+        <polygon points="50,15 80,32.5 80,67.5 50,85 20,67.5 20,32.5" 
+                 fill="none" 
+                 stroke="url(#hexGrad)" 
+                 strokeWidth="3"/>
+        
+        {/* Alternating bonds */}
+        <line x1="50" y1="15" x2="65" y2="23.75" stroke="#c4b5fd" strokeWidth="2" opacity="0.8"/>
+        <line x1="65" y1="23.75" x2="80" y2="32.5" stroke="#e0e7ff" strokeWidth="1.5" opacity="0.5"/>
+        <line x1="80" y1="32.5" x2="80" y2="50" stroke="#e0e7ff" strokeWidth="1.5" opacity="0.5"/>
+        <line x1="80" y1="50" x2="80" y2="67.5" stroke="#c4b5fd" strokeWidth="2" opacity="0.8"/>
+        <line x1="80" y1="67.5" x2="65" y2="76.25" stroke="#c4b5fd" strokeWidth="2" opacity="0.8"/>
+        <line x1="65" y1="76.25" x2="50" y2="85" stroke="#e0e7ff" strokeWidth="1.5" opacity="0.5"/>
+        <line x1="50" y1="85" x2="35" y2="76.25" stroke="#e0e7ff" strokeWidth="1.5" opacity="0.5"/>
+        <line x1="35" y1="76.25" x2="20" y2="67.5" stroke="#c4b5fd" strokeWidth="2" opacity="0.8"/>
+        <line x1="20" y1="67.5" x2="20" y2="50" stroke="#c4b5fd" strokeWidth="2" opacity="0.8"/>
+        <line x1="20" y1="50" x2="20" y2="32.5" stroke="#e0e7ff" strokeWidth="1.5" opacity="0.5"/>
+        <line x1="20" y1="32.5" x2="35" y2="23.75" stroke="#e0e7ff" strokeWidth="1.5" opacity="0.5"/>
+        <line x1="35" y1="23.75" x2="50" y2="15" stroke="#c4b5fd" strokeWidth="2" opacity="0.8"/>
+        
+        {/* Center healing symbol */}
+        <circle cx="50" cy="50" r="12" fill="none" stroke="url(#aztecGrad)" strokeWidth="2" opacity="0.7"/>
+        <circle cx="50" cy="50" r="7" fill="none" stroke="#60a5fa" strokeWidth="1.5" opacity="0.8"/>
+        <circle cx="50" cy="50" r="3" fill="#3b82f6"/>
+        
+        {/* Aztec cross rays */}
+        <line x1="50" y1="38" x2="50" y2="43" stroke="#0ea5e9" strokeWidth="2" opacity="0.9"/>
+        <line x1="50" y1="57" x2="50" y2="62" stroke="#0ea5e9" strokeWidth="2" opacity="0.9"/>
+        <line x1="38" y1="50" x2="43" y2="50" stroke="#0ea5e9" strokeWidth="2" opacity="0.9"/>
+        <line x1="57" y1="50" x2="62" y2="50" stroke="#0ea5e9" strokeWidth="2" opacity="0.9"/>
+        
+        {/* Carbon atoms */}
+        <circle cx="50" cy="15" r="3" fill="#c4b5fd" stroke="#818cf8" strokeWidth="1"/>
+        <circle cx="80" cy="32.5" r="3" fill="#c4b5fd" stroke="#818cf8" strokeWidth="1"/>
+        <circle cx="80" cy="67.5" r="3" fill="#c4b5fd" stroke="#818cf8" strokeWidth="1"/>
+        <circle cx="50" cy="85" r="3" fill="#c4b5fd" stroke="#818cf8" strokeWidth="1"/>
+        <circle cx="20" cy="67.5" r="3" fill="#c4b5fd" stroke="#818cf8" strokeWidth="1"/>
+        <circle cx="20" cy="32.5" r="3" fill="#c4b5fd" stroke="#818cf8" strokeWidth="1"/>
+      </svg>
+      
+      {/* Brand text */}
+      <div className="flex items-baseline gap-2">
+        <span style={{fontSize: s.text}} className="font-light text-indigo-200 tracking-wide">
+          Pahtia
+        </span>
+        <span style={{fontSize: s.text * 0.75}} className="font-semibold text-indigo-400 tracking-widest">
+          LABS
+        </span>
+      </div>
+    </div>
+  );
+}
+
 /* ---------- Tooltip ---------- */
 function Tooltip({ text }) {
   const [visible, setVisible] = useState(false);
@@ -171,16 +250,13 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-gray-900 p-6 text-white flex flex-col">
       <div className="max-w-6xl mx-auto flex-1">
-        <header className="mb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <svg className="text-indigo-400 w-10 h-10" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M21 8.5l-2-2.5-4 4-4-4-4 4-2-2v10l2 2h16l2-2v-10zm-5 7.5h-8v-2h8v2zm0-4h-8v-2h8v2z"/>
-                <path d="M14 2l-1 2h-2l-1-2h-2v4h8V2h-2z"/>
-              </svg>
-              <h1 className="text-4xl font-extrabold text-indigo-300">PrepCalc</h1>
+        <header className="mb-8">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <PahtiaLogo size="lg" />
+            <div className="text-right">
+              <p className="text-xl font-light text-indigo-300">PrepCalc</p>
+              <p className="text-sm text-gray-400">IV Dosing Calculator</p>
             </div>
-            <p className="text-sm text-gray-400">IV Dosing Calculator</p>
           </div>
         </header>
 
@@ -281,7 +357,7 @@ export default function App() {
 
       <footer className="mt-10 py-4 text-center text-xs text-gray-500 opacity-70">
         <p>Non-clinical demo — verify calculations before clinical use.</p>
-        <p>© {new Date().getFullYear()} PrepCalc — All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Pahtia Labs — All rights reserved.</p>
       </footer>
     </div>
   );
