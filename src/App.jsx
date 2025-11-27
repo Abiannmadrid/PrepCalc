@@ -147,11 +147,20 @@ function InputRow({ label, value, onChange, children, invalid, tooltip }) {
 
 /* ---------- MAIN APP ---------- */
 export default function App() {
+  const [mode, setMode] = useState("dose"); // "dose" or "dilution"
+  
+  // Dose calculation states
   const [vialStrength, setVialStrength] = useState("");
   const [vialUnit, setVialUnit] = useState("mg");
   const [vialVolume, setVialVolume] = useState("");
   const [desiredStrength, setDesiredStrength] = useState("");
   const [desiredUnit, setDesiredUnit] = useState("mg");
+
+  // Dilution calculation states
+  const [drugAmount, setDrugAmount] = useState("");
+  const [drugUnit, setDrugUnit] = useState("mg");
+  const [targetConcentration, setTargetConcentration] = useState("");
+  const [targetConcUnit, setTargetConcUnit] = useState("mg");
 
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
@@ -167,11 +176,15 @@ export default function App() {
     setVialVolume("");
     setDesiredStrength("");
     setDesiredUnit("mg");
+    setDrugAmount("");
+    setDrugUnit("mg");
+    setTargetConcentration("");
+    setTargetConcUnit("mg");
     setResult(null);
     setError("");
   };
 
-  /* ---------- CORE CALCULATION ---------- */
+  /* ---------- DOSE CALCULATION ---------- */
   const calculateVolume = () => {
     setError("");
     setResult(null);
@@ -241,11 +254,79 @@ export default function App() {
     setResult({ volume: rounded, unit: "mL" });
   };
 
+  /* ---------- DILUTION CALCULATION ---------- */
+  const calculateDilution = () => {
+    setError("");
+    setResult(null);
+
+    const drug = Number(drugAmount);
+    const targetConc = Number(targetConcentration);
+
+    if (!drug || !targetConc) {
+      setError("Please enter valid numeric values.");
+      return;
+    }
+    if (drug <= 0) {
+      setError("Drug amount must be greater than zero.");
+      return;
+    }
+    if (targetConc <= 0) {
+      setError("Target concentration must be greater than zero.");
+      return;
+    }
+
+    const drugIsMass = massUnits.has(drugUnit);
+    const targetIsMass = massUnits.has(targetConcUnit);
+    const drugIsElectro = electrolyteUnits.has(drugUnit);
+    const targetIsElectro = electrolyteUnits.has(targetConcUnit);
+
+    if (
+      !(
+        (drugIsMass && targetIsMass) ||
+        (drugIsElectro && targetIsElectro)
+      )
+    ) {
+      setError("Unit mismatch — mass must match mass, mmol/mEq must match mmol/mEq.");
+      return;
+    }
+
+    // Normalize to same base unit (mg for mass)
+    let drugBase = drug;
+    let targetBase = targetConc;
+
+    if (drugIsMass && targetIsMass) {
+      if (drugUnit === "g") drugBase *= 1000;
+      if (drugUnit === "mcg") drugBase /= 1000;
+
+      if (targetConcUnit === "g") targetBase *= 1000;
+      if (targetConcUnit === "mcg") targetBase /= 1000;
+    }
+
+    // Formula: Volume needed = Drug amount / Target concentration
+    // Target concentration is per mL, so result is in mL
+    const volumeNeeded = drugBase / targetBase;
+
+    if (volumeNeeded <= 0 || !isFinite(volumeNeeded)) {
+      setError("Invalid result — please recheck values.");
+      return;
+    }
+
+    const rounded = Math.round(volumeNeeded * 10) / 10;
+    setResult({ 
+      volume: rounded, 
+      unit: "mL",
+      type: "dilution"
+    });
+  };
+
   const vialStrengthInvalid = vialStrength && isNaN(Number(vialStrength));
   const vialVolumeInvalid =
     vialVolume && (isNaN(Number(vialVolume)) || Number(vialVolume) <= 0);
   const desiredStrengthInvalid =
     desiredStrength && isNaN(Number(desiredStrength));
+  
+  const drugAmountInvalid = drugAmount && isNaN(Number(drugAmount));
+  const targetConcInvalid = targetConcentration && isNaN(Number(targetConcentration));
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-gray-900 p-6 text-white flex flex-col">
@@ -260,71 +341,164 @@ export default function App() {
           </div>
         </header>
 
+        {/* Mode Toggle */}
+        <div className="mb-6 flex justify-center">
+          <div className="bg-gray-800/90 p-1 rounded-xl inline-flex gap-1">
+            <button
+              onClick={() => {
+                setMode("dose");
+                resetAll();
+              }}
+              className={`px-6 py-2 rounded-lg font-medium transition ${
+                mode === "dose"
+                  ? "bg-indigo-600 text-white"
+                  : "text-gray-400 hover:text-gray-200"
+              }`}
+            >
+              Calculate Dose
+            </button>
+            <button
+              onClick={() => {
+                setMode("dilution");
+                resetAll();
+              }}
+              className={`px-6 py-2 rounded-lg font-medium transition ${
+                mode === "dilution"
+                  ? "bg-indigo-600 text-white"
+                  : "text-gray-400 hover:text-gray-200"
+              }`}
+            >
+              Calculate Dilution
+            </button>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
           
           {/* LEFT: INPUTS */}
           <section className="bg-gray-800/90 p-6 rounded-2xl border border-gray-700 shadow-lg">
+            
+            {mode === "dose" ? (
+              /* DOSE CALCULATION INPUTS */
+              <>
+                <InputRow
+                  label="Vial Strength"
+                  value={vialStrength}
+                  onChange={setVialStrength}
+                  invalid={vialStrengthInvalid}
+                  tooltip="Total amount of drug in the vial (e.g., 50 mg)"
+                >
+                  <select
+                    value={vialUnit}
+                    onChange={(e) => setVialUnit(e.target.value)}
+                    className="p-3 rounded-xl bg-gray-900 border border-gray-600 text-white"
+                  >
+                    {unitOptions.map((u) => (
+                      <option key={u} value={u}>{u}</option>
+                    ))}
+                  </select>
+                </InputRow>
 
-            <InputRow
-              label="Vial Strength"
-              value={vialStrength}
-              onChange={setVialStrength}
-              invalid={vialStrengthInvalid}
-              tooltip="Total amount of drug in the vial (e.g., 50 mg)"
-            >
-              <select
-                value={vialUnit}
-                onChange={(e) => setVialUnit(e.target.value)}
-                className="p-3 rounded-xl bg-gray-900 border border-gray-600 text-white"
-              >
-                {unitOptions.map((u) => (
-                  <option key={u} value={u}>{u}</option>
-                ))}
-              </select>
-            </InputRow>
+                <InputRow
+                  label="Reference Volume (mL)"
+                  value={vialVolume}
+                  onChange={setVialVolume}
+                  invalid={vialVolumeInvalid}
+                  tooltip="Total volume in the vial (e.g., 10 mL)"
+                />
 
-            <InputRow
-              label="Reference Volume (mL)"
-              value={vialVolume}
-              onChange={setVialVolume}
-              invalid={vialVolumeInvalid}
-              tooltip="Total volume in the vial (e.g., 10 mL)"
-            />
+                <InputRow
+                  label="Desired Dose"
+                  value={desiredStrength}
+                  onChange={setDesiredStrength}
+                  invalid={desiredStrengthInvalid}
+                  tooltip="Amount you need to prepare (e.g., 25 mg)"
+                >
+                  <select
+                    value={desiredUnit}
+                    onChange={(e) => setDesiredUnit(e.target.value)}
+                    className="p-3 rounded-xl bg-gray-900 border border-gray-600 text-white"
+                  >
+                    {unitOptions.map((u) => (
+                      <option key={u} value={u}>{u}</option>
+                    ))}
+                  </select>
+                </InputRow>
 
-            <InputRow
-              label="Desired Dose"
-              value={desiredStrength}
-              onChange={setDesiredStrength}
-              invalid={desiredStrengthInvalid}
-              tooltip="Amount you need to prepare (e.g., 25 mg)"
-            >
-              <select
-                value={desiredUnit}
-                onChange={(e) => setDesiredUnit(e.target.value)}
-                className="p-3 rounded-xl bg-gray-900 border border-gray-600 text-white"
-              >
-                {unitOptions.map((u) => (
-                  <option key={u} value={u}>{u}</option>
-                ))}
-              </select>
-            </InputRow>
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={calculateVolume}
+                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-xl font-medium"
+                  >
+                    Calculate
+                  </button>
+                  <button
+                    onClick={resetAll}
+                    className="flex items-center justify-center w-14 bg-gray-700 hover:bg-gray-600 text-white rounded-xl"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </>
+            ) : (
+              /* DILUTION CALCULATION INPUTS */
+              <>
+                <InputRow
+                  label="Drug Amount"
+                  value={drugAmount}
+                  onChange={setDrugAmount}
+                  invalid={drugAmountInvalid}
+                  tooltip="Total amount of drug you have (e.g., 125 mg)"
+                >
+                  <select
+                    value={drugUnit}
+                    onChange={(e) => setDrugUnit(e.target.value)}
+                    className="p-3 rounded-xl bg-gray-900 border border-gray-600 text-white"
+                  >
+                    {unitOptions.map((u) => (
+                      <option key={u} value={u}>{u}</option>
+                    ))}
+                  </select>
+                </InputRow>
 
-            <div className="flex gap-3 mt-6">
-              <button
-                onClick={calculateVolume}
-                className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-xl font-medium"
-              >
-                Calculate
-              </button>
-              <button
-                onClick={resetAll}
-                className="flex items-center justify-center w-14 bg-gray-700 hover:bg-gray-600 text-white rounded-xl"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-              </button>
-            </div>
+                <InputRow
+                  label="Target Concentration (per mL)"
+                  value={targetConcentration}
+                  onChange={setTargetConcentration}
+                  invalid={targetConcInvalid}
+                  tooltip="Desired final concentration per mL (e.g., 5 mcg/mL)"
+                >
+                  <select
+                    value={targetConcUnit}
+                    onChange={(e) => setTargetConcUnit(e.target.value)}
+                    className="p-3 rounded-xl bg-gray-900 border border-gray-600 text-white"
+                  >
+                    {unitOptions.map((u) => (
+                      <option key={u} value={u}>{u}</option>
+                    ))}
+                  </select>
+                </InputRow>
+
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={calculateDilution}
+                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-xl font-medium"
+                  >
+                    Calculate
+                  </button>
+                  <button
+                    onClick={resetAll}
+                    className="flex items-center justify-center w-14 bg-gray-700 hover:bg-gray-600 text-white rounded-xl"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </>
+            )}
           </section>
 
           {/* RIGHT: RESULT */}
@@ -340,12 +514,16 @@ export default function App() {
                 className="w-full text-center p-6 rounded-2xl border border-indigo-600"
                 style={{ background: "linear-gradient(145deg, #1f1f23, #2e2e41)" }}
               >
-                <p className="text-sm text-gray-400">Volume to draw</p>
+                <p className="text-sm text-gray-400">
+                  {result.type === "dilution" ? "Total volume needed" : "Volume to draw"}
+                </p>
                 <p className="text-3xl font-extrabold text-indigo-400 mt-2">
                   {result.volume} {result.unit}
                 </p>
                 <p className="text-xs text-gray-500 mt-2">
-                  Rounded to nearest 0.1 mL
+                  {result.type === "dilution" 
+                    ? "Add diluent to reach this total volume" 
+                    : "Rounded to nearest 0.1 mL"}
                 </p>
               </div>
             ) : (
