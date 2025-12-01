@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/',
+  base: './',
+  root: './app'  // Tell Vite to look in the app folder
 })
 
