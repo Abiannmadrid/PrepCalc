@@ -515,7 +515,7 @@ export default function App() {
                 style={{ background: "linear-gradient(145deg, #1f1f23, #2e2e41)" }}
               >
                 <p className="text-sm text-gray-400">
-                  {result.type === "dilution" ? "Total volume needed" : "Volume to draw"}
+                  {result.type === "Dilution" ? "Total volume needed" : "Volume to draw"}
                 </p>
                 <p className="text-3xl font-extrabold text-indigo-400 mt-2">
                   {result.volume} {result.unit}
