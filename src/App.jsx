@@ -250,7 +250,7 @@ export default function App() {
       return;
     }
 
-    const rounded = Math.round(volume * 10) / 10;
+    const rounded = Math.round(volume * 100) / 100;
     setResult({ volume: rounded, unit: "mL" });
   };
 
@@ -311,7 +311,7 @@ export default function App() {
       return;
     }
 
-    const rounded = Math.round(volumeNeeded * 10) / 10;
+    const rounded = Math.round(volumeNeeded * 100) / 100;
     setResult({ 
       volume: rounded, 
       unit: "mL",
@@ -523,7 +523,7 @@ export default function App() {
                 <p className="text-xs text-gray-500 mt-2">
                   {result.type === "dilution" 
                     ? "Add diluent to reach this total volume" 
-                    : "Rounded to nearest 0.1 mL"}
+                    : "Rounded to nearest 0.01 mL"}
                 </p>
               </div>
             ) : (
