@@ -239,19 +239,34 @@ export default function App() {
       return;
     }
 
-    const volume = desiredBase / concentration;
-    if (volume <= 0 || !isFinite(volume)) {
+    const volumeNeeded = desiredBase / concentration;
+    if (volumeNeeded <= 0 || !isFinite(volumeNeeded)) {
       setError("Invalid result — please recheck values.");
       return;
     }
 
+    // Check if multiple vials are needed
     if (desiredBase > vialBase) {
-      setError("Desired dose exceeds total in vial.");
-      return;
+      const vialsNeeded = Math.ceil(desiredBase / vialBase);
+      const volumePerVial = Math.round(vialV * 100) / 100;
+      const totalVolume = Math.round(volumePerVial * vialsNeeded * 100) / 100;
+      
+      setResult({ 
+        volume: volumePerVial,
+        totalVolume: totalVolume,
+        vialsNeeded: vialsNeeded,
+        unit: "mL",
+        multiVial: true
+      });
+    } else {
+      // Single vial calculation
+      const rounded = Math.round(volumeNeeded * 100) / 100;
+      setResult({ 
+        volume: rounded, 
+        unit: "mL",
+        multiVial: false
+      });
     }
-
-    const rounded = Math.round(volume * 100) / 100;
-    setResult({ volume: rounded, unit: "mL" });
   };
 
   /* ---------- DILUTION CALCULATION ---------- */
@@ -303,7 +318,6 @@ export default function App() {
     }
 
     // Formula: Volume needed = Drug amount / Target concentration
-    // Target concentration is per mL, so result is in mL
     const volumeNeeded = drugBase / targetBase;
 
     if (volumeNeeded <= 0 || !isFinite(volumeNeeded)) {
@@ -514,17 +528,45 @@ export default function App() {
                 className="w-full text-center p-6 rounded-2xl border border-indigo-600"
                 style={{ background: "linear-gradient(145deg, #1f1f23, #2e2e41)" }}
               >
-                <p className="text-sm text-gray-400">
-                  {result.type === "Dilution" ? "Total volume needed" : "Volume to draw"}
-                </p>
-                <p className="text-3xl font-extrabold text-indigo-400 mt-2">
-                  {result.volume} {result.unit}
-                </p>
-                <p className="text-xs text-gray-500 mt-2">
-                  {result.type === "dilution" 
-                    ? "Add diluent to reach this total volume" 
-                    : "Rounded to nearest 0.01 mL"}
-                </p>
+                {result.multiVial ? (
+                  /* Multi-vial result */
+                  <>
+                    <p className="text-sm text-gray-400 mb-2">You will need:</p>
+                    <p className="text-4xl font-extrabold text-indigo-400">
+                      {result.vialsNeeded} vials
+                    </p>
+                    <div className="mt-4 pt-4 border-t border-gray-700">
+                      <p className="text-sm text-gray-400">Draw from each vial:</p>
+                      <p className="text-2xl font-bold text-indigo-300 mt-1">
+                        {result.volume} {result.unit}
+                      </p>
+                    </div>
+                    <div className="mt-3">
+                      <p className="text-sm text-gray-400">Total volume:</p>
+                      <p className="text-xl font-semibold text-cyan-400 mt-1">
+                        {result.totalVolume} {result.unit}
+                      </p>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-4">
+                      Rounded to nearest 0.01 mL
+                    </p>
+                  </>
+                ) : (
+                  /* Single vial or dilution result */
+                  <>
+                    <p className="text-sm text-gray-400">
+                      {result.type === "dilution" ? "Total volume needed" : "Volume to draw"}
+                    </p>
+                    <p className="text-3xl font-extrabold text-indigo-400 mt-2">
+                      {result.volume} {result.unit}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-2">
+                      {result.type === "dilution" 
+                        ? "Add diluent to reach this total volume" 
+                        : "Rounded to nearest 0.01 mL"}
+                    </p>
+                  </>
+                )}
               </div>
             ) : (
               <p className="text-gray-400">Enter inputs and press Calculate</p>
