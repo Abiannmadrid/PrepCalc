@@ -370,7 +370,7 @@ export default function App() {
       <div className="max-w-6xl mx-auto flex-1">
         <header className="mb-8">
           <div className="flex items-center justify-between flex-wrap gap-4">
-            <a href="https://pathialabs.com" className="hover:opacity-80 transition">
+            <a href="https://pahtialabs.com" className="hover:opacity-80 transition">
               <PahtiaLogo size="lg" />
             </a>
             <div className="flex items-center gap-4">
