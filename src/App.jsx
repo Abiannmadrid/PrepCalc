@@ -39,7 +39,29 @@ const translations = {
     errorInvalidResult: "Invalid result — please recheck values.",
     footerDisclaimer: "Non-clinical demo — verify calculations before clinical use.",
     footerCopyright: "Pahtia Labs — All rights reserved.",
-    placeholder: "Enter value"
+    placeholder: "Enter value",
+    showSteps: "Show Steps",
+    stepByStep: "Step-by-Step Calculation",
+    given: "Given",
+    vialContains: "Vial contains",
+    desiredDoseLabel: "Desired dose",
+    convertVial: "Convert vial",
+    convertDesired: "Convert desired",
+    calcConcentration: "Calculate concentration",
+    calcVolume: "Calculate volume",
+    roundNearest: "Round to nearest 0.01 mL",
+    exceedsSingle: "Desired dose ({desired}) exceeds single vial ({vial})",
+    vialsNeeded: "Number of vials needed",
+    drawFromEach: "Draw from each vial",
+    totalVolumeCalc: "Total volume",
+    roundedUp: "rounded up",
+    givenDrug: "Given: Drug amount",
+    targetConc: "Target concentration",
+    convertDrug: "Convert drug",
+    convertTarget: "Convert target",
+    formula: "Formula: Volume = Drug amount ÷ Target concentration",
+    calculate: "Calculate",
+    addDiluent: "Add diluent to reach total volume of"
   },
   es: {
     appName: "PrepCalc",
@@ -79,7 +101,29 @@ const translations = {
     errorInvalidResult: "Resultado inválido — por favor revise los valores.",
     footerDisclaimer: "Demo no clínica — verifique los cálculos antes del uso clínico.",
     footerCopyright: "Pahtia Labs — Todos los derechos reservados.",
-    placeholder: "Ingresar valor"
+    placeholder: "Ingresar valor",
+    showSteps: "Mostrar Pasos",
+    stepByStep: "Cálculo Paso a Paso",
+    given: "Dado",
+    vialContains: "El vial contiene",
+    desiredDoseLabel: "Dosis deseada",
+    convertVial: "Convertir vial",
+    convertDesired: "Convertir deseada",
+    calcConcentration: "Calcular concentración",
+    calcVolume: "Calcular volumen",
+    roundNearest: "Redondear al 0.01 mL más cercano",
+    exceedsSingle: "La dosis deseada ({desired}) excede un solo vial ({vial})",
+    vialsNeeded: "Número de viales necesarios",
+    drawFromEach: "Extraer de cada vial",
+    totalVolumeCalc: "Volumen total",
+    roundedUp: "redondeado hacia arriba",
+    givenDrug: "Dado: Cantidad de medicamento",
+    targetConc: "Concentración objetivo",
+    convertDrug: "Convertir medicamento",
+    convertTarget: "Convertir objetivo",
+    formula: "Fórmula: Volumen = Cantidad de medicamento ÷ Concentración objetivo",
+    calculate: "Calcular",
+    addDiluent: "Agregar diluyente para alcanzar un volumen total de"
   },
   fr: {
     appName: "PrepCalc",
@@ -119,7 +163,29 @@ const translations = {
     errorInvalidResult: "Résultat invalide — veuillez revérifier les valeurs.",
     footerDisclaimer: "Démo non clinique — vérifiez les calculs avant utilisation clinique.",
     footerCopyright: "Pahtia Labs — Tous droits réservés.",
-    placeholder: "Entrer une valeur"
+    placeholder: "Entrer une valeur",
+    showSteps: "Afficher les Étapes",
+    stepByStep: "Calcul Étape par Étape",
+    given: "Donné",
+    vialContains: "Le flacon contient",
+    desiredDoseLabel: "Dose souhaitée",
+    convertVial: "Convertir le flacon",
+    convertDesired: "Convertir souhaité",
+    calcConcentration: "Calculer la concentration",
+    calcVolume: "Calculer le volume",
+    roundNearest: "Arrondir au 0,01 mL le plus proche",
+    exceedsSingle: "La dose souhaitée ({desired}) dépasse un seul flacon ({vial})",
+    vialsNeeded: "Nombre de flacons nécessaires",
+    drawFromEach: "Prélever de chaque flacon",
+    totalVolumeCalc: "Volume total",
+    roundedUp: "arrondi vers le haut",
+    givenDrug: "Donné: Quantité de médicament",
+    targetConc: "Concentration cible",
+    convertDrug: "Convertir médicament",
+    convertTarget: "Convertir cible",
+    formula: "Formule: Volume = Quantité de médicament ÷ Concentration cible",
+    calculate: "Calculer",
+    addDiluent: "Ajouter du diluant pour atteindre un volume total de"
   },
   pt: {
     appName: "PrepCalc",
@@ -159,7 +225,29 @@ const translations = {
     errorInvalidResult: "Resultado inválido — por favor, verifique os valores.",
     footerDisclaimer: "Demo não clínica — verifique os cálculos antes do uso clínico.",
     footerCopyright: "Pahtia Labs — Todos os direitos reservados.",
-    placeholder: "Inserir valor"
+    placeholder: "Inserir valor",
+    showSteps: "Mostrar Passos",
+    stepByStep: "Cálculo Passo a Passo",
+    given: "Dado",
+    vialContains: "O frasco contém",
+    desiredDoseLabel: "Dose desejada",
+    convertVial: "Converter frasco",
+    convertDesired: "Converter desejada",
+    calcConcentration: "Calcular concentração",
+    calcVolume: "Calcular volume",
+    roundNearest: "Arredondar para o 0,01 mL mais próximo",
+    exceedsSingle: "A dose desejada ({desired}) excede um único frasco ({vial})",
+    vialsNeeded: "Número de frascos necessários",
+    drawFromEach: "Aspirar de cada frasco",
+    totalVolumeCalc: "Volume total",
+    roundedUp: "arredondado para cima",
+    givenDrug: "Dado: Quantidade de medicamento",
+    targetConc: "Concentração alvo",
+    convertDrug: "Converter medicamento",
+    convertTarget: "Converter alvo",
+    formula: "Fórmula: Volume = Quantidade de medicamento ÷ Concentração alvo",
+    calculate: "Calcular",
+    addDiluent: "Adicionar diluente para atingir um volume total de"
   },
   de: {
     appName: "PrepCalc",
@@ -199,7 +287,29 @@ const translations = {
     errorInvalidResult: "Ungültiges Ergebnis — bitte Werte überprüfen.",
     footerDisclaimer: "Nicht-klinische Demo — Berechnungen vor klinischer Verwendung überprüfen.",
     footerCopyright: "Pahtia Labs — Alle Rechte vorbehalten.",
-    placeholder: "Wert eingeben"
+    placeholder: "Wert eingeben",
+    showSteps: "Schritte Anzeigen",
+    stepByStep: "Schritt-für-Schritt-Berechnung",
+    given: "Gegeben",
+    vialContains: "Durchstechflasche enthält",
+    desiredDoseLabel: "Gewünschte Dosis",
+    convertVial: "Durchstechflasche konvertieren",
+    convertDesired: "Gewünschte konvertieren",
+    calcConcentration: "Konzentration berechnen",
+    calcVolume: "Volumen berechnen",
+    roundNearest: "Auf 0,01 mL runden",
+    exceedsSingle: "Gewünschte Dosis ({desired}) überschreitet einzelne Durchstechflasche ({vial})",
+    vialsNeeded: "Anzahl benötigter Durchstechflaschen",
+    drawFromEach: "Aus jeder Durchstechflasche entnehmen",
+    totalVolumeCalc: "Gesamtvolumen",
+    roundedUp: "aufgerundet",
+    givenDrug: "Gegeben: Arzneimittelmenge",
+    targetConc: "Zielkonzentration",
+    convertDrug: "Arzneimittel konvertieren",
+    convertTarget: "Ziel konvertieren",
+    formula: "Formel: Volumen = Arzneimittelmenge ÷ Zielkonzentration",
+    calculate: "Berechnen",
+    addDiluent: "Verdünnungsmittel hinzufügen, um ein Gesamtvolumen von zu erreichen"
   },
   ja: {
     appName: "PrepCalc",
@@ -239,7 +349,29 @@ const translations = {
     errorInvalidResult: "無効な結果 — 値を再確認してください。",
     footerDisclaimer: "非臨床デモ — 臨床使用前に計算を確認してください。",
     footerCopyright: "Pahtia Labs — 無断転載を禁じます。",
-    placeholder: "値を入力"
+    placeholder: "値を入力",
+    showSteps: "手順を表示",
+    stepByStep: "段階的な計算",
+    given: "与えられた",
+    vialContains: "バイアルには",
+    desiredDoseLabel: "希望投与量",
+    convertVial: "バイアルを変換",
+    convertDesired: "希望を変換",
+    calcConcentration: "濃度を計算",
+    calcVolume: "容量を計算",
+    roundNearest: "最も近い0.01 mLに四捨五入",
+    exceedsSingle: "希望投与量（{desired}）が単一バイアル（{vial}）を超えています",
+    vialsNeeded: "必要なバイアルの数",
+    drawFromEach: "各バイアルから吸引",
+    totalVolumeCalc: "総容量",
+    roundedUp: "切り上げ",
+    givenDrug: "与えられた：薬剤量",
+    targetConc: "目標濃度",
+    convertDrug: "薬剤を変換",
+    convertTarget: "目標を変換",
+    formula: "式：容量 = 薬剤量 ÷ 目標濃度",
+    calculate: "計算",
+    addDiluent: "総容量に達するために希釈剤を追加"
   },
   it: {
     appName: "PrepCalc",
@@ -279,7 +411,29 @@ const translations = {
     errorInvalidResult: "Risultato non valido — verifica i valori.",
     footerDisclaimer: "Demo non clinica — verifica i calcoli prima dell'uso clinico.",
     footerCopyright: "Pahtia Labs — Tutti i diritti riservati.",
-    placeholder: "Inserisci valore"
+    placeholder: "Inserisci valore",
+    showSteps: "Mostra Passaggi",
+    stepByStep: "Calcolo Passo dopo Passo",
+    given: "Dato",
+    vialContains: "La fiala contiene",
+    desiredDoseLabel: "Dose desiderata",
+    convertVial: "Convertire fiala",
+    convertDesired: "Convertire desiderata",
+    calcConcentration: "Calcolare concentrazione",
+    calcVolume: "Calcolare volume",
+    roundNearest: "Arrotondare a 0,01 mL più vicino",
+    exceedsSingle: "La dose desiderata ({desired}) supera una singola fiala ({vial})",
+    vialsNeeded: "Numero di fiale necessarie",
+    drawFromEach: "Preleva da ogni fiala",
+    totalVolumeCalc: "Volume totale",
+    roundedUp: "arrotondato per eccesso",
+    givenDrug: "Dato: Quantità di farmaco",
+    targetConc: "Concentrazione target",
+    convertDrug: "Convertire farmaco",
+    convertTarget: "Convertire target",
+    formula: "Formula: Volume = Quantità di farmaco ÷ Concentrazione target",
+    calculate: "Calcola",
+    addDiluent: "Aggiungi diluente per raggiungere un volume totale di"
   },
   zh: {
     appName: "PrepCalc",
@@ -319,7 +473,29 @@ const translations = {
     errorInvalidResult: "无效结果 — 请重新检查数值。",
     footerDisclaimer: "非临床演示 — 在临床使用前验证计算。",
     footerCopyright: "Pahtia Labs — 保留所有权利。",
-    placeholder: "输入数值"
+    placeholder: "输入数值",
+    showSteps: "显示步骤",
+    stepByStep: "逐步计算",
+    given: "给定",
+    vialContains: "药瓶含有",
+    desiredDoseLabel: "期望剂量",
+    convertVial: "转换药瓶",
+    convertDesired: "转换期望",
+    calcConcentration: "计算浓度",
+    calcVolume: "计算体积",
+    roundNearest: "四舍五入到最接近的0.01毫升",
+    exceedsSingle: "期望剂量（{desired}）超过单个药瓶（{vial}）",
+    vialsNeeded: "所需药瓶数量",
+    drawFromEach: "从每个药瓶抽取",
+    totalVolumeCalc: "总体积",
+    roundedUp: "向上取整",
+    givenDrug: "给定：药物量",
+    targetConc: "目标浓度",
+    convertDrug: "转换药物",
+    convertTarget: "转换目标",
+    formula: "公式：体积 = 药物量 ÷ 目标浓度",
+    calculate: "计算",
+    addDiluent: "添加稀释剂以达到总体积"
   },
   ko: {
     appName: "PrepCalc",
@@ -359,7 +535,29 @@ const translations = {
     errorInvalidResult: "유효하지 않은 결과 — 값을 다시 확인하십시오.",
     footerDisclaimer: "비임상 데모 — 임상 사용 전에 계산을 확인하십시오.",
     footerCopyright: "Pahtia Labs — 판권 소유.",
-    placeholder: "값 입력"
+    placeholder: "값 입력",
+    showSteps: "단계 표시",
+    stepByStep: "단계별 계산",
+    given: "주어진",
+    vialContains: "바이알에 포함",
+    desiredDoseLabel: "원하는 용량",
+    convertVial: "바이알 변환",
+    convertDesired: "원하는 변환",
+    calcConcentration: "농도 계산",
+    calcVolume: "부피 계산",
+    roundNearest: "가장 가까운 0.01 mL로 반올림",
+    exceedsSingle: "원하는 용량（{desired}）이 단일 바이알（{vial}）을 초과합니다",
+    vialsNeeded: "필요한 바이알 수",
+    drawFromEach: "각 바이알에서 추출",
+    totalVolumeCalc: "총 부피",
+    roundedUp: "올림",
+    givenDrug: "주어진：약물량",
+    targetConc: "목표 농도",
+    convertDrug: "약물 변환",
+    convertTarget: "목표 변환",
+    formula: "공식：부피 = 약물량 ÷ 목표 농도",
+    calculate: "계산",
+    addDiluent: "총 부피에 도달하도록 희석제 추가"
   },
   pl: {
     appName: "PrepCalc",
@@ -399,7 +597,29 @@ const translations = {
     errorInvalidResult: "Nieprawidłowy wynik — sprawdź ponownie wartości.",
     footerDisclaimer: "Demo niekliniczne — zweryfikuj obliczenia przed użyciem klinicznym.",
     footerCopyright: "Pahtia Labs — Wszelkie prawa zastrzeżone.",
-    placeholder: "Wprowadź wartość"
+    placeholder: "Wprowadź wartość",
+    showSteps: "Pokaż Kroki",
+    stepByStep: "Obliczenie Krok po Kroku",
+    given: "Dane",
+    vialContains: "Fiolka zawiera",
+    desiredDoseLabel: "Pożądana dawka",
+    convertVial: "Konwertuj fiolkę",
+    convertDesired: "Konwertuj pożądaną",
+    calcConcentration: "Oblicz stężenie",
+    calcVolume: "Oblicz objętość",
+    roundNearest: "Zaokrąglij do najbliższego 0,01 mL",
+    exceedsSingle: "Pożądana dawka ({desired}) przekracza pojedynczą fiolkę ({vial})",
+    vialsNeeded: "Liczba potrzebnych fiolek",
+    drawFromEach: "Pobierz z każdej fiolki",
+    totalVolumeCalc: "Całkowita objętość",
+    roundedUp: "zaokrąglone w górę",
+    givenDrug: "Dane: Ilość leku",
+    targetConc: "Docelowe stężenie",
+    convertDrug: "Konwertuj lek",
+    convertTarget: "Konwertuj docelowe",
+    formula: "Wzór: Objętość = Ilość leku ÷ Docelowe stężenie",
+    calculate: "Oblicz",
+    addDiluent: "Dodaj rozcieńczalnik, aby osiągnąć całkowitą objętość"
   }
 };
 
@@ -682,7 +902,7 @@ export default function App() {
       <div className="max-w-6xl mx-auto flex-1">
         <header className="mb-8">
           <div className="flex items-center justify-between flex-wrap gap-4">
-            <a href="https://pahtialabs.com" className="hover:opacity-80 transition">
+            <a href="https://pathialabs.com" className="hover:opacity-80 transition">
               <PahtiaLogo size="lg" />
             </a>
             <div className="flex items-center gap-4">
@@ -769,7 +989,7 @@ export default function App() {
               <h3 className="text-lg font-semibold text-gray-200">{t.result}</h3>
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" checked={showSteps} onChange={(e) => setShowSteps(e.target.checked)} className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-indigo-600 focus:ring-indigo-500" />
-                <span className="text-sm text-gray-300">Show Steps</span>
+                <span className="text-sm text-gray-300">{t.showSteps}</span>
               </label>
             </div>
             {error ? (
@@ -810,7 +1030,7 @@ export default function App() {
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  Step-by-Step Calculation
+                  {t.stepByStep}
                 </h4>
                 <div className="space-y-2">
                   {calculationSteps.map((step, index) => (
