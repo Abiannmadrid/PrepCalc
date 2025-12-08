@@ -499,6 +499,8 @@ export default function App() {
   const [targetConcUnit, setTargetConcUnit] = useState("mg");
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
+  const [showSteps, setShowSteps] = useState(false);
+  const [calculationSteps, setCalculationSteps] = useState([]);
 
   const t = translations[language];
   const unitOptions = ["mg", "mcg", "g", "mmol", "meq", "mL"];
@@ -508,11 +510,17 @@ export default function App() {
   useEffect(() => {
     const saved = localStorage.getItem("prepcalc-language");
     if (saved && translations[saved]) setLanguage(saved);
+    const savedSteps = localStorage.getItem("prepcalc-showSteps");
+    if (savedSteps !== null) setShowSteps(savedSteps === "true");
   }, []);
 
   useEffect(() => {
     localStorage.setItem("prepcalc-language", language);
   }, [language]);
+
+  useEffect(() => {
+    localStorage.setItem("prepcalc-showSteps", showSteps);
+  }, [showSteps]);
 
   const resetAll = () => {
     setVialStrength("");
@@ -526,11 +534,15 @@ export default function App() {
     setTargetConcUnit("mg");
     setResult(null);
     setError("");
+    setCalculationSteps([]);
   };
 
   const calculateVolume = () => {
     setError("");
     setResult(null);
+    setCalculationSteps([]);
+    const steps = [];
+    
     const vialS = Number(vialStrength);
     const vialV = Number(vialVolume);
     const desired = Number(desiredStrength);
@@ -538,6 +550,9 @@ export default function App() {
     if (!vialS || !vialV || !desired) { setError(t.errorNumeric); return; }
     if (vialV <= 0) { setError(t.errorVolume); return; }
     if (desired <= 0) { setError(t.errorDose); return; }
+
+    steps.push(`Given: Vial contains ${vialS} ${vialUnit} in ${vialV} mL`);
+    steps.push(`Desired dose: ${desired} ${desiredUnit}`);
 
     const vialIsMass = massUnits.has(vialUnit);
     const desiredIsMass = massUnits.has(desiredUnit);
@@ -553,37 +568,69 @@ export default function App() {
     let desiredBase = desired;
 
     if (vialIsMass && desiredIsMass) {
-      if (vialUnit === "g") vialBase *= 1000;
-      if (vialUnit === "mcg") vialBase /= 1000;
-      if (desiredUnit === "g") desiredBase *= 1000;
-      if (desiredUnit === "mcg") desiredBase /= 1000;
+      if (vialUnit === "g") {
+        vialBase *= 1000;
+        steps.push(`Convert vial: ${vialS} g × 1000 = ${vialBase} mg`);
+      }
+      if (vialUnit === "mcg") {
+        vialBase /= 1000;
+        steps.push(`Convert vial: ${vialS} mcg ÷ 1000 = ${vialBase} mg`);
+      }
+      if (desiredUnit === "g") {
+        desiredBase *= 1000;
+        steps.push(`Convert desired: ${desired} g × 1000 = ${desiredBase} mg`);
+      }
+      if (desiredUnit === "mcg") {
+        desiredBase /= 1000;
+        steps.push(`Convert desired: ${desired} mcg ÷ 1000 = ${desiredBase} mg`);
+      }
     }
 
     const concentration = vialBase / vialV;
     if (concentration <= 0 || !isFinite(concentration)) { setError(t.errorConcentration); return; }
+    
+    steps.push(`Calculate concentration: ${vialBase} mg ÷ ${vialV} mL = ${concentration.toFixed(2)} mg/mL`);
 
     const volumeNeeded = desiredBase / concentration;
     if (volumeNeeded <= 0 || !isFinite(volumeNeeded)) { setError(t.errorInvalidResult); return; }
+
+    steps.push(`Calculate volume: ${desiredBase} mg ÷ ${concentration.toFixed(2)} mg/mL = ${volumeNeeded.toFixed(2)} mL`);
 
     if (desiredBase > vialBase) {
       const vialsNeeded = Math.ceil(desiredBase / vialBase);
       const volumePerVial = Math.round(vialV * 100) / 100;
       const totalVolume = Math.round(volumePerVial * vialsNeeded * 100) / 100;
+      
+      steps.push(`Desired dose (${desiredBase} mg) exceeds single vial (${vialBase} mg)`);
+      steps.push(`Number of vials needed: ${desiredBase} mg ÷ ${vialBase} mg/vial = ${(desiredBase/vialBase).toFixed(2)} → ${vialsNeeded} vials (rounded up)`);
+      steps.push(`Draw from each vial: ${volumePerVial} mL`);
+      steps.push(`Total volume: ${volumePerVial} mL × ${vialsNeeded} vials = ${totalVolume} mL`);
+      
+      setCalculationSteps(steps);
       setResult({ volume: volumePerVial, totalVolume, vialsNeeded, unit: "mL", multiVial: true });
     } else {
-      setResult({ volume: Math.round(volumeNeeded * 100) / 100, unit: "mL", multiVial: false });
+      const rounded = Math.round(volumeNeeded * 100) / 100;
+      steps.push(`Round to nearest 0.01 mL: ${rounded} mL`);
+      setCalculationSteps(steps);
+      setResult({ volume: rounded, unit: "mL", multiVial: false });
     }
   };
 
   const calculateDilution = () => {
     setError("");
     setResult(null);
+    setCalculationSteps([]);
+    const steps = [];
+    
     const drug = Number(drugAmount);
     const targetConc = Number(targetConcentration);
 
     if (!drug || !targetConc) { setError(t.errorNumeric); return; }
     if (drug <= 0) { setError(t.errorDrugAmount); return; }
     if (targetConc <= 0) { setError(t.errorTargetConc); return; }
+
+    steps.push(`Given: Drug amount = ${drug} ${drugUnit}`);
+    steps.push(`Target concentration = ${targetConc} ${targetConcUnit}/mL`);
 
     const drugIsMass = massUnits.has(drugUnit);
     const targetIsMass = massUnits.has(targetConcUnit);
@@ -599,16 +646,35 @@ export default function App() {
     let targetBase = targetConc;
 
     if (drugIsMass && targetIsMass) {
-      if (drugUnit === "g") drugBase *= 1000;
-      if (drugUnit === "mcg") drugBase /= 1000;
-      if (targetConcUnit === "g") targetBase *= 1000;
-      if (targetConcUnit === "mcg") targetBase /= 1000;
+      if (drugUnit === "g") {
+        drugBase *= 1000;
+        steps.push(`Convert drug: ${drug} g × 1000 = ${drugBase} mg`);
+      }
+      if (drugUnit === "mcg") {
+        drugBase /= 1000;
+        steps.push(`Convert drug: ${drug} mcg ÷ 1000 = ${drugBase} mg`);
+      }
+      if (targetConcUnit === "g") {
+        targetBase *= 1000;
+        steps.push(`Convert target: ${targetConc} g × 1000 = ${targetBase} mg`);
+      }
+      if (targetConcUnit === "mcg") {
+        targetBase /= 1000;
+        steps.push(`Convert target: ${targetConc} mcg ÷ 1000 = ${targetBase} mg`);
+      }
     }
 
+    steps.push(`Formula: Volume = Drug amount ÷ Target concentration`);
     const volumeNeeded = drugBase / targetBase;
     if (volumeNeeded <= 0 || !isFinite(volumeNeeded)) { setError(t.errorInvalidResult); return; }
 
-    setResult({ volume: Math.round(volumeNeeded * 100) / 100, unit: "mL", type: "dilution" });
+    steps.push(`Calculate: ${drugBase} mg ÷ ${targetBase} mg/mL = ${volumeNeeded.toFixed(2)} mL`);
+    const rounded = Math.round(volumeNeeded * 100) / 100;
+    steps.push(`Round to nearest 0.01 mL: ${rounded} mL`);
+    steps.push(`Add diluent to reach total volume of ${rounded} mL`);
+    
+    setCalculationSteps(steps);
+    setResult({ volume: rounded, unit: "mL", type: "dilution" });
   };
 
   return (
@@ -699,7 +765,13 @@ export default function App() {
           </section>
 
           <aside className="bg-gray-800/95 border border-indigo-700 rounded-2xl shadow-lg p-6 flex flex-col justify-center items-center">
-            <h3 className="text-lg font-semibold text-gray-200 mb-2">{t.result}</h3>
+            <div className="w-full flex items-center justify-between mb-2">
+              <h3 className="text-lg font-semibold text-gray-200">{t.result}</h3>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={showSteps} onChange={(e) => setShowSteps(e.target.checked)} className="w-4 h-4 rounded border-gray-600 bg-gray-700 text-indigo-600 focus:ring-indigo-500" />
+                <span className="text-sm text-gray-300">Show Steps</span>
+              </label>
+            </div>
             {error ? (
               <div className="bg-red-900 border border-red-600 rounded-lg p-4 w-full text-center">
                 <p className="text-red-400 font-medium">{error}</p>
@@ -730,6 +802,27 @@ export default function App() {
               </div>
             ) : (
               <p className="text-gray-400">{t.enterInputs}</p>
+            )}
+            
+            {showSteps && calculationSteps.length > 0 && (
+              <div className="w-full mt-6 pt-6 border-t border-gray-700">
+                <h4 className="text-md font-semibold text-indigo-300 mb-3 flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  Step-by-Step Calculation
+                </h4>
+                <div className="space-y-2">
+                  {calculationSteps.map((step, index) => (
+                    <div key={index} className="flex items-start gap-3 text-sm">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-xs font-semibold">
+                        {index + 1}
+                      </span>
+                      <p className="text-gray-300 leading-relaxed">{step}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
           </aside>
         </div>
