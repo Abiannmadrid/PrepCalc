@@ -771,8 +771,8 @@ export default function App() {
     if (vialV <= 0) { setError(t.errorVolume); return; }
     if (desired <= 0) { setError(t.errorDose); return; }
 
-    steps.push(`Given: Vial contains ${vialS} ${vialUnit} in ${vialV} mL`);
-    steps.push(`Desired dose: ${desired} ${desiredUnit}`);
+    steps.push(`${t.given}: ${t.vialContains} ${vialS} ${vialUnit} ${language === 'en' ? 'in' : language === 'es' ? 'en' : language === 'fr' ? 'dans' : language === 'pt' ? 'em' : language === 'de' ? 'in' : language === 'ja' ? 'で' : language === 'it' ? 'in' : language === 'zh' ? '在' : language === 'ko' ? '에' : 'w'} ${vialV} mL`);
+    steps.push(`${t.desiredDoseLabel}: ${desired} ${desiredUnit}`);
 
     const vialIsMass = massUnits.has(vialUnit);
     const desiredIsMass = massUnits.has(desiredUnit);
@@ -790,47 +790,47 @@ export default function App() {
     if (vialIsMass && desiredIsMass) {
       if (vialUnit === "g") {
         vialBase *= 1000;
-        steps.push(`Convert vial: ${vialS} g × 1000 = ${vialBase} mg`);
+        steps.push(`${t.convertVial}: ${vialS} g × 1000 = ${vialBase} mg`);
       }
       if (vialUnit === "mcg") {
         vialBase /= 1000;
-        steps.push(`Convert vial: ${vialS} mcg ÷ 1000 = ${vialBase} mg`);
+        steps.push(`${t.convertVial}: ${vialS} mcg ÷ 1000 = ${vialBase} mg`);
       }
       if (desiredUnit === "g") {
         desiredBase *= 1000;
-        steps.push(`Convert desired: ${desired} g × 1000 = ${desiredBase} mg`);
+        steps.push(`${t.convertDesired}: ${desired} g × 1000 = ${desiredBase} mg`);
       }
       if (desiredUnit === "mcg") {
         desiredBase /= 1000;
-        steps.push(`Convert desired: ${desired} mcg ÷ 1000 = ${desiredBase} mg`);
+        steps.push(`${t.convertDesired}: ${desired} mcg ÷ 1000 = ${desiredBase} mg`);
       }
     }
 
     const concentration = vialBase / vialV;
     if (concentration <= 0 || !isFinite(concentration)) { setError(t.errorConcentration); return; }
     
-    steps.push(`Calculate concentration: ${vialBase} mg ÷ ${vialV} mL = ${concentration.toFixed(2)} mg/mL`);
+    steps.push(`${t.calcConcentration}: ${vialBase} mg ÷ ${vialV} mL = ${concentration.toFixed(2)} mg/mL`);
 
     const volumeNeeded = desiredBase / concentration;
     if (volumeNeeded <= 0 || !isFinite(volumeNeeded)) { setError(t.errorInvalidResult); return; }
 
-    steps.push(`Calculate volume: ${desiredBase} mg ÷ ${concentration.toFixed(2)} mg/mL = ${volumeNeeded.toFixed(2)} mL`);
+    steps.push(`${t.calcVolume}: ${desiredBase} mg ÷ ${concentration.toFixed(2)} mg/mL = ${volumeNeeded.toFixed(2)} mL`);
 
     if (desiredBase > vialBase) {
       const vialsNeeded = Math.ceil(desiredBase / vialBase);
       const volumePerVial = Math.round(vialV * 100) / 100;
       const totalVolume = Math.round(volumePerVial * vialsNeeded * 100) / 100;
       
-      steps.push(`Desired dose (${desiredBase} mg) exceeds single vial (${vialBase} mg)`);
-      steps.push(`Number of vials needed: ${desiredBase} mg ÷ ${vialBase} mg/vial = ${(desiredBase/vialBase).toFixed(2)} → ${vialsNeeded} vials (rounded up)`);
-      steps.push(`Draw from each vial: ${volumePerVial} mL`);
-      steps.push(`Total volume: ${volumePerVial} mL × ${vialsNeeded} vials = ${totalVolume} mL`);
+      steps.push(`${t.exceedsSingle.replace('{desired}', `${desiredBase} mg`).replace('{vial}', `${vialBase} mg`)}`);
+      steps.push(`${t.vialsNeeded}: ${desiredBase} mg ÷ ${vialBase} mg/${language === 'en' ? 'vial' : language === 'es' ? 'vial' : language === 'fr' ? 'flacon' : language === 'pt' ? 'frasco' : language === 'de' ? 'Durchstechflasche' : language === 'ja' ? 'バイアル' : language === 'it' ? 'fiala' : language === 'zh' ? '药瓶' : language === 'ko' ? '바이알' : 'fiolka'} = ${(desiredBase/vialBase).toFixed(2)} → ${vialsNeeded} ${t.vials} (${t.roundedUp})`);
+      steps.push(`${t.drawFromEach}: ${volumePerVial} mL`);
+      steps.push(`${t.totalVolumeCalc}: ${volumePerVial} mL × ${vialsNeeded} ${t.vials} = ${totalVolume} mL`);
       
       setCalculationSteps(steps);
       setResult({ volume: volumePerVial, totalVolume, vialsNeeded, unit: "mL", multiVial: true });
     } else {
       const rounded = Math.round(volumeNeeded * 100) / 100;
-      steps.push(`Round to nearest 0.01 mL: ${rounded} mL`);
+      steps.push(`${t.roundNearest}: ${rounded} mL`);
       setCalculationSteps(steps);
       setResult({ volume: rounded, unit: "mL", multiVial: false });
     }
@@ -849,8 +849,8 @@ export default function App() {
     if (drug <= 0) { setError(t.errorDrugAmount); return; }
     if (targetConc <= 0) { setError(t.errorTargetConc); return; }
 
-    steps.push(`Given: Drug amount = ${drug} ${drugUnit}`);
-    steps.push(`Target concentration = ${targetConc} ${targetConcUnit}/mL`);
+    steps.push(`${t.givenDrug} = ${drug} ${drugUnit}`);
+    steps.push(`${t.targetConc} = ${targetConc} ${targetConcUnit}/mL`);
 
     const drugIsMass = massUnits.has(drugUnit);
     const targetIsMass = massUnits.has(targetConcUnit);
@@ -868,30 +868,30 @@ export default function App() {
     if (drugIsMass && targetIsMass) {
       if (drugUnit === "g") {
         drugBase *= 1000;
-        steps.push(`Convert drug: ${drug} g × 1000 = ${drugBase} mg`);
+        steps.push(`${t.convertDrug}: ${drug} g × 1000 = ${drugBase} mg`);
       }
       if (drugUnit === "mcg") {
         drugBase /= 1000;
-        steps.push(`Convert drug: ${drug} mcg ÷ 1000 = ${drugBase} mg`);
+        steps.push(`${t.convertDrug}: ${drug} mcg ÷ 1000 = ${drugBase} mg`);
       }
       if (targetConcUnit === "g") {
         targetBase *= 1000;
-        steps.push(`Convert target: ${targetConc} g × 1000 = ${targetBase} mg`);
+        steps.push(`${t.convertTarget}: ${targetConc} g × 1000 = ${targetBase} mg`);
       }
       if (targetConcUnit === "mcg") {
         targetBase /= 1000;
-        steps.push(`Convert target: ${targetConc} mcg ÷ 1000 = ${targetBase} mg`);
+        steps.push(`${t.convertTarget}: ${targetConc} mcg ÷ 1000 = ${targetBase} mg`);
       }
     }
 
-    steps.push(`Formula: Volume = Drug amount ÷ Target concentration`);
+    steps.push(`${t.formula}`);
     const volumeNeeded = drugBase / targetBase;
     if (volumeNeeded <= 0 || !isFinite(volumeNeeded)) { setError(t.errorInvalidResult); return; }
 
-    steps.push(`Calculate: ${drugBase} mg ÷ ${targetBase} mg/mL = ${volumeNeeded.toFixed(2)} mL`);
+    steps.push(`${t.calculate}: ${drugBase} mg ÷ ${targetBase} mg/mL = ${volumeNeeded.toFixed(2)} mL`);
     const rounded = Math.round(volumeNeeded * 100) / 100;
-    steps.push(`Round to nearest 0.01 mL: ${rounded} mL`);
-    steps.push(`Add diluent to reach total volume of ${rounded} mL`);
+    steps.push(`${t.roundNearest}: ${rounded} mL`);
+    steps.push(`${t.addDiluent} ${rounded} mL`);
     
     setCalculationSteps(steps);
     setResult({ volume: rounded, unit: "mL", type: "dilution" });
@@ -902,7 +902,7 @@ export default function App() {
       <div className="max-w-6xl mx-auto flex-1">
         <header className="mb-8">
           <div className="flex items-center justify-between flex-wrap gap-4">
-            <a href="https://pahtialabs.com" className="hover:opacity-80 transition">
+            <a href="https://pathialabs.com" className="hover:opacity-80 transition">
               <PahtiaLogo size="lg" />
             </a>
             <div className="flex items-center gap-4">
