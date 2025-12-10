@@ -623,56 +623,6 @@ const translations = {
   }
 };
 
-// ----------------------------
-// GLOBAL CONSTANTS & UNITS
-// ----------------------------
-
-// Unit classification
-const massUnits = new Set(["mg", "g", "mcg"]);
-const electrolyteUnits = new Set(["mmol", "meq"]);
-
-const BASE_MASS_UNIT = "mg";
-const BASE_ELECTRO_UNIT = "meq";
-
-// ----------------------------
-// UTILITY FUNCTIONS
-// ----------------------------
-
-function getBaseUnit(unit) {
-  if (massUnits.has(unit)) return BASE_MASS_UNIT;
-  if (electrolyteUnits.has(unit)) return BASE_ELECTRO_UNIT;
-  return unit;
-}
-
-function getConcentrationUnit(unit) {
-  if (massUnits.has(unit)) return `${BASE_MASS_UNIT}/mL`;
-  if (electrolyteUnits.has(unit)) return `${BASE_ELECTRO_UNIT}/mL`;
-  return `${unit}/mL`;
-}
-
-function convertToBase(value, unit, steps, labels) {
-  let result = value;
-
-  if (massUnits.has(unit)) {
-    if (unit === "g") {
-      result = value * 1000;
-      steps.push(`${labels.convert}: ${value} g × 1000 = ${result} mg`);
-    } else if (unit === "mcg") {
-      result = value / 1000;
-      steps.push(`${labels.convert}: ${value} mcg ÷ 1000 = ${result} mg`);
-    }
-  }
-
-  // Electrolytes (meq, mmol, etc.) usually don't need conversion
-  return result;
-}
-
-// ----------------------------
-// COMPONENTS (Logo, Tooltip, Inputs, etc.)
-// ----------------------------
-// existing components like PahtiaLogo, Tooltip, InputRow, LanguageSelector
-
-
 function PahtiaLogo({ size = "md" }) {
   const sizes = { sm: { hex: 20, text: 16 }, md: { hex: 30, text: 24 }, lg: { hex: 40, text: 32 } };
   const s = sizes[size];
@@ -755,30 +705,6 @@ function InputRow({ label, value, onChange, children, invalid, tooltip, placehol
   );
 }
 
-function getConcentrationUnit(unit) {
-  if (massUnits.has(unit)) return `${BASE_MASS_UNIT}/mL`;
-  if (electrolyteUnits.has(unit)) return `${BASE_ELECTRO_UNIT}/mL`;
-  return `${unit}/mL`;
-}
-
-function convertToBase(value, unit, steps, labels) {
-  let result = value;
-
-  if (massUnits.has(unit)) {
-    if (unit === "g") {
-      result = value * 1000;
-      steps.push(`${labels.convert}: ${value} g × 1000 = ${result} mg`);
-    } else if (unit === "mcg") {
-      result = value / 1000;
-      steps.push(`${labels.convert}: ${value} mcg ÷ 1000 = ${result} mg`);
-    }
-  }
-
-  // electrolytes (meq, mmol, etc.) usually don't convert.
-
-  return result;
-}
-
 export default function App() {
   const [language, setLanguage] = useState("en");
   const [mode, setMode] = useState("dose");
@@ -798,6 +724,8 @@ export default function App() {
 
   const t = translations[language];
   const unitOptions = ["mg", "mcg", "g", "mmol", "meq", "mL"];
+  const massUnits = new Set(["mg", "g", "mcg"]);
+  const electrolyteUnits = new Set(["mmol", "meq"]);
 
   useEffect(() => {
     const saved = localStorage.getItem("prepcalc-language");
@@ -834,71 +762,70 @@ export default function App() {
     setResult(null);
     setCalculationSteps([]);
     const steps = [];
-  
-    const vialLabel = getBaseUnit(vialUnit);          // Add this
-    const vialBase = convertToBase(vialStrength, vialUnit, steps, { convert: t.convertVial }); // Add this
-    const concUnit = getConcentrationUnit(vialUnit);  // Add this
-
+    
     const vialS = Number(vialStrength);
     const vialV = Number(vialVolume);
     const desired = Number(desiredStrength);
-  
-    if (isNaN(vialS) || isNaN(vialV) || isNaN(desired)) {
-      setError(t.errorNumeric);
-      return;
-    }
+
+    if (!vialS || !vialV || !desired) { setError(t.errorNumeric); return; }
     if (vialV <= 0) { setError(t.errorVolume); return; }
     if (desired <= 0) { setError(t.errorDose); return; }
-  
-    const desiredLabel = getBaseUnit(desiredUnit);
-  
-    steps.push(`${t.given}: ${t.vialContains} ${vialS} ${vialUnit} ${t.in} ${vialV} mL`);
+
+    steps.push(`${t.given}: ${t.vialContains} ${vialS} ${vialUnit} ${language === 'en' ? 'in' : language === 'es' ? 'en' : language === 'fr' ? 'dans' : language === 'pt' ? 'em' : language === 'de' ? 'in' : language === 'ja' ? 'で' : language === 'it' ? 'in' : language === 'zh' ? '在' : language === 'ko' ? '에' : 'w'} ${vialV} mL`);
     steps.push(`${t.desiredDoseLabel}: ${desired} ${desiredUnit}`);
-  
+
     const vialIsMass = massUnits.has(vialUnit);
     const desiredIsMass = massUnits.has(desiredUnit);
     const vialIsElectro = electrolyteUnits.has(vialUnit);
     const desiredIsElectro = electrolyteUnits.has(desiredUnit);
-  
+
     if (!((vialIsMass && desiredIsMass) || (vialIsElectro && desiredIsElectro))) {
       setError(t.errorUnitMismatch);
       return;
     }
-  
-    let desiredBase = convertToBase(desired, desiredUnit, steps, { convert: t.convertDesired });
-  
+
+    let vialBase = vialS;
+    let desiredBase = desired;
+
+    if (vialIsMass && desiredIsMass) {
+      if (vialUnit === "g") {
+        vialBase *= 1000;
+        steps.push(`${t.convertVial}: ${vialS} g × 1000 = ${vialBase} mg`);
+      }
+      if (vialUnit === "mcg") {
+        vialBase /= 1000;
+        steps.push(`${t.convertVial}: ${vialS} mcg ÷ 1000 = ${vialBase} mg`);
+      }
+      if (desiredUnit === "g") {
+        desiredBase *= 1000;
+        steps.push(`${t.convertDesired}: ${desired} g × 1000 = ${desiredBase} mg`);
+      }
+      if (desiredUnit === "mcg") {
+        desiredBase /= 1000;
+        steps.push(`${t.convertDesired}: ${desired} mcg ÷ 1000 = ${desiredBase} mg`);
+      }
+    }
+
     const concentration = vialBase / vialV;
-  
-    if (concentration <= 0 || !isFinite(concentration)) {
-      setError(t.errorConcentration);
-      return;
-    }
-  
-    steps.push(`${t.calcConcentration}: ${vialBase} ${vialLabel} ÷ ${vialV} mL = ${concentration.toFixed(2)} ${concUnit}`);
-  
+    if (concentration <= 0 || !isFinite(concentration)) { setError(t.errorConcentration); return; }
+    
+    steps.push(`${t.calcConcentration}: ${vialBase} mg ÷ ${vialV} mL = ${concentration.toFixed(2)} mg/mL`);
+
     const volumeNeeded = desiredBase / concentration;
-    if (volumeNeeded <= 0 || !isFinite(volumeNeeded)) {
-      setError(t.errorInvalidResult);
-      return;
-    }
-  
-    steps.push(`${t.calcVolume}: ${desiredBase} ${desiredLabel} ÷ ${concentration.toFixed(2)} ${concUnit} = ${volumeNeeded.toFixed(2)} mL`);
-  
+    if (volumeNeeded <= 0 || !isFinite(volumeNeeded)) { setError(t.errorInvalidResult); return; }
+
+    steps.push(`${t.calcVolume}: ${desiredBase} mg ÷ ${concentration.toFixed(2)} mg/mL = ${volumeNeeded.toFixed(2)} mL`);
+
     if (desiredBase > vialBase) {
       const vialsNeeded = Math.ceil(desiredBase / vialBase);
       const volumePerVial = Math.round(vialV * 100) / 100;
       const totalVolume = Math.round(volumePerVial * vialsNeeded * 100) / 100;
-  
-      steps.push(
-        t.exceedsSingle
-          .replace('{desired}', `${desiredBase} ${desiredLabel}`)
-          .replace('{vial}', `${vialBase} ${vialLabel}`)
-      );
-  
-      steps.push(`${t.vialsNeeded}: ${desiredBase} ${desiredLabel} ÷ ${vialBase} ${vialLabel}/${t.vial} = ${vialsNeeded}`);
+      
+      steps.push(`${t.exceedsSingle.replace('{desired}', `${desiredBase} mg`).replace('{vial}', `${vialBase} mg`)}`);
+      steps.push(`${t.vialsNeeded}: ${desiredBase} mg ÷ ${vialBase} mg/${language === 'en' ? 'vial' : language === 'es' ? 'vial' : language === 'fr' ? 'flacon' : language === 'pt' ? 'frasco' : language === 'de' ? 'Durchstechflasche' : language === 'ja' ? 'バイアル' : language === 'it' ? 'fiala' : language === 'zh' ? '药瓶' : language === 'ko' ? '바이알' : 'fiolka'} = ${(desiredBase/vialBase).toFixed(2)} → ${vialsNeeded} ${t.vials} (${t.roundedUp})`);
       steps.push(`${t.drawFromEach}: ${volumePerVial} mL`);
-      steps.push(`${t.totalVolumeCalc}: ${volumePerVial} mL × ${vialsNeeded} = ${totalVolume} mL`);
-  
+      steps.push(`${t.totalVolumeCalc}: ${volumePerVial} mL × ${vialsNeeded} ${t.vials} = ${totalVolume} mL`);
+      
       setCalculationSteps(steps);
       setResult({ volume: volumePerVial, totalVolume, vialsNeeded, unit: "mL", multiVial: true });
     } else {
@@ -907,62 +834,68 @@ export default function App() {
       setCalculationSteps(steps);
       setResult({ volume: rounded, unit: "mL", multiVial: false });
     }
-  };  
+  };
 
   const calculateDilution = () => {
     setError("");
     setResult(null);
     setCalculationSteps([]);
     const steps = [];
-  
+    
     const drug = Number(drugAmount);
     const targetConc = Number(targetConcentration);
-  
-    if (isNaN(drug) || isNaN(targetConc)) {
-      setError(t.errorNumeric);
-      return;
-    }
+
+    if (!drug || !targetConc) { setError(t.errorNumeric); return; }
     if (drug <= 0) { setError(t.errorDrugAmount); return; }
     if (targetConc <= 0) { setError(t.errorTargetConc); return; }
-  
-    const drugLabel = getBaseUnit(drugUnit);
-    const targetLabel = getBaseUnit(targetConcUnit);
-    const concUnit = getConcentrationUnit(targetConcUnit);
-  
-    steps.push(`${t.givenDrug}: ${drug} ${drugUnit}`);
-    steps.push(`${t.targetConc}: ${targetConc} ${targetConcUnit}/mL`);
-  
+
+    steps.push(`${t.givenDrug} = ${drug} ${drugUnit}`);
+    steps.push(`${t.targetConc} = ${targetConc} ${targetConcUnit}/mL`);
+
     const drugIsMass = massUnits.has(drugUnit);
     const targetIsMass = massUnits.has(targetConcUnit);
     const drugIsElectro = electrolyteUnits.has(drugUnit);
     const targetIsElectro = electrolyteUnits.has(targetConcUnit);
-  
+
     if (!((drugIsMass && targetIsMass) || (drugIsElectro && targetIsElectro))) {
       setError(t.errorUnitMismatch);
       return;
     }
-  
-    const drugBase = convertToBase(drug, drugUnit, steps, { convert: t.convertDrug });
-    const targetBase = convertToBase(targetConc, targetConcUnit, steps, { convert: t.convertTarget });
-  
-    steps.push(t.formula);
-  
-    const volumeNeeded = drugBase / targetBase;
-  
-    if (volumeNeeded <= 0 || !isFinite(volumeNeeded)) {
-      setError(t.errorInvalidResult);
-      return;
+
+    let drugBase = drug;
+    let targetBase = targetConc;
+
+    if (drugIsMass && targetIsMass) {
+      if (drugUnit === "g") {
+        drugBase *= 1000;
+        steps.push(`${t.convertDrug}: ${drug} g × 1000 = ${drugBase} mg`);
+      }
+      if (drugUnit === "mcg") {
+        drugBase /= 1000;
+        steps.push(`${t.convertDrug}: ${drug} mcg ÷ 1000 = ${drugBase} mg`);
+      }
+      if (targetConcUnit === "g") {
+        targetBase *= 1000;
+        steps.push(`${t.convertTarget}: ${targetConc} g × 1000 = ${targetBase} mg`);
+      }
+      if (targetConcUnit === "mcg") {
+        targetBase /= 1000;
+        steps.push(`${t.convertTarget}: ${targetConc} mcg ÷ 1000 = ${targetBase} mg`);
+      }
     }
-  
-    steps.push(`${t.calculate}: ${drugBase} ${drugLabel} ÷ ${targetBase} ${targetLabel}/mL = ${volumeNeeded.toFixed(2)} mL`);
-  
+
+    steps.push(`${t.formula}`);
+    const volumeNeeded = drugBase / targetBase;
+    if (volumeNeeded <= 0 || !isFinite(volumeNeeded)) { setError(t.errorInvalidResult); return; }
+
+    steps.push(`${t.calculate}: ${drugBase} mg ÷ ${targetBase} mg/mL = ${volumeNeeded.toFixed(2)} mL`);
     const rounded = Math.round(volumeNeeded * 100) / 100;
     steps.push(`${t.roundNearest}: ${rounded} mL`);
-    steps.push(`${t.addDiluent}: ${rounded} mL`);
-  
+    steps.push(`${t.addDiluent} ${rounded} mL`);
+    
     setCalculationSteps(steps);
-    setResult({ volume: rounded, unit: "mL" });
-  };  
+    setResult({ volume: rounded, unit: "mL", type: "dilution" });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-gray-900 p-6 text-white flex flex-col">
@@ -1122,55 +1055,3 @@ export default function App() {
     </div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
