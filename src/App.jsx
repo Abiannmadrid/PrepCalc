@@ -622,12 +622,56 @@ const translations = {
     addDiluent: "Dodaj rozcieńczalnik, aby osiągnąć całkowitą objętość"
   }
 };
-// Unit classification (GLOBAL)
+
+// ----------------------------
+// GLOBAL CONSTANTS & UNITS
+// ----------------------------
+
+// Unit classification
 const massUnits = new Set(["mg", "g", "mcg"]);
 const electrolyteUnits = new Set(["mmol", "meq"]);
 
 const BASE_MASS_UNIT = "mg";
 const BASE_ELECTRO_UNIT = "meq";
+
+// ----------------------------
+// UTILITY FUNCTIONS
+// ----------------------------
+
+function getBaseUnit(unit) {
+  if (massUnits.has(unit)) return BASE_MASS_UNIT;
+  if (electrolyteUnits.has(unit)) return BASE_ELECTRO_UNIT;
+  return unit;
+}
+
+function getConcentrationUnit(unit) {
+  if (massUnits.has(unit)) return `${BASE_MASS_UNIT}/mL`;
+  if (electrolyteUnits.has(unit)) return `${BASE_ELECTRO_UNIT}/mL`;
+  return `${unit}/mL`;
+}
+
+function convertToBase(value, unit, steps, labels) {
+  let result = value;
+
+  if (massUnits.has(unit)) {
+    if (unit === "g") {
+      result = value * 1000;
+      steps.push(`${labels.convert}: ${value} g × 1000 = ${result} mg`);
+    } else if (unit === "mcg") {
+      result = value / 1000;
+      steps.push(`${labels.convert}: ${value} mcg ÷ 1000 = ${result} mg`);
+    }
+  }
+
+  // Electrolytes (meq, mmol, etc.) usually don't need conversion
+  return result;
+}
+
+// ----------------------------
+// COMPONENTS (Logo, Tooltip, Inputs, etc.)
+// ----------------------------
+// existing components like PahtiaLogo, Tooltip, InputRow, LanguageSelector
+
 
 function PahtiaLogo({ size = "md" }) {
   const sizes = { sm: { hex: 20, text: 16 }, md: { hex: 30, text: 24 }, lg: { hex: 40, text: 32 } };
@@ -791,6 +835,10 @@ export default function App() {
     setCalculationSteps([]);
     const steps = [];
   
+    const vialLabel = getBaseUnit(vialUnit);          // Add this
+    const vialBase = convertToBase(vialStrength, vialUnit, steps, { convert: t.convertVial }); // Add this
+    const concUnit = getConcentrationUnit(vialUnit);  // Add this
+
     const vialS = Number(vialStrength);
     const vialV = Number(vialVolume);
     const desired = Number(desiredStrength);
@@ -802,7 +850,6 @@ export default function App() {
     if (vialV <= 0) { setError(t.errorVolume); return; }
     if (desired <= 0) { setError(t.errorDose); return; }
   
-    const vialLabel = getBaseUnit(vialUnit);
     const desiredLabel = getBaseUnit(desiredUnit);
   
     steps.push(`${t.given}: ${t.vialContains} ${vialS} ${vialUnit} ${t.in} ${vialV} mL`);
@@ -818,11 +865,9 @@ export default function App() {
       return;
     }
   
-    let vialBase = convertToBase(vialS, vialUnit, steps, { convert: t.convertVial });
     let desiredBase = convertToBase(desired, desiredUnit, steps, { convert: t.convertDesired });
   
     const concentration = vialBase / vialV;
-    const concUnit = getConcentrationUnit(vialUnit);
   
     if (concentration <= 0 || !isFinite(concentration)) {
       setError(t.errorConcentration);
