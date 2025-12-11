@@ -809,20 +809,21 @@ export default function App() {
     const concentration = vialBase / vialV;
     if (concentration <= 0 || !isFinite(concentration)) { setError(t.errorConcentration); return; }
     
-    steps.push(`${t.calcConcentration}: ${vialBase} mg ÷ ${vialV} mL = ${concentration.toFixed(2)} mg/mL`);
+    const baseUnit = vialIsMass ? 'mg' : (vialUnit === 'mmol' ? 'mmol' : 'mEq');
+    steps.push(`${t.calcConcentration}: ${vialBase} ${baseUnit} ÷ ${vialV} mL = ${concentration.toFixed(2)} ${baseUnit}/mL`);
 
     const volumeNeeded = desiredBase / concentration;
     if (volumeNeeded <= 0 || !isFinite(volumeNeeded)) { setError(t.errorInvalidResult); return; }
 
-    steps.push(`${t.calcVolume}: ${desiredBase} mg ÷ ${concentration.toFixed(2)} mg/mL = ${volumeNeeded.toFixed(2)} mL`);
+    steps.push(`${t.calcVolume}: ${desiredBase} ${baseUnit} ÷ ${concentration.toFixed(2)} ${baseUnit}/mL = ${volumeNeeded.toFixed(2)} mL`);
 
     if (desiredBase > vialBase) {
       const vialsNeeded = Math.ceil(desiredBase / vialBase);
       const volumePerVial = Math.round(vialV * 100) / 100;
       const totalVolume = Math.round(volumePerVial * vialsNeeded * 100) / 100;
       
-      steps.push(`${t.exceedsSingle.replace('{desired}', `${desiredBase} mg`).replace('{vial}', `${vialBase} mg`)}`);
-      steps.push(`${t.vialsNeeded}: ${desiredBase} mg ÷ ${vialBase} mg/${language === 'en' ? 'vial' : language === 'es' ? 'vial' : language === 'fr' ? 'flacon' : language === 'pt' ? 'frasco' : language === 'de' ? 'Durchstechflasche' : language === 'ja' ? 'バイアル' : language === 'it' ? 'fiala' : language === 'zh' ? '药瓶' : language === 'ko' ? '바이알' : 'fiolka'} = ${(desiredBase/vialBase).toFixed(2)} → ${vialsNeeded} ${t.vials} (${t.roundedUp})`);
+      steps.push(`${t.exceedsSingle.replace('{desired}', `${desiredBase} ${baseUnit}`).replace('{vial}', `${vialBase} ${baseUnit}`)}`);
+      steps.push(`${t.vialsNeeded}: ${desiredBase} ${baseUnit} ÷ ${vialBase} ${baseUnit}/${language === 'en' ? 'vial' : language === 'es' ? 'vial' : language === 'fr' ? 'flacon' : language === 'pt' ? 'frasco' : language === 'de' ? 'Durchstechflasche' : language === 'ja' ? 'バイアル' : language === 'it' ? 'fiala' : language === 'zh' ? '药瓶' : language === 'ko' ? '바이알' : 'fiolka'} = ${(desiredBase/vialBase).toFixed(2)} → ${vialsNeeded} ${t.vials} (${t.roundedUp})`);
       steps.push(`${t.drawFromEach}: ${volumePerVial} mL`);
       steps.push(`${t.totalVolumeCalc}: ${volumePerVial} mL × ${vialsNeeded} ${t.vials} = ${totalVolume} mL`);
       
@@ -888,7 +889,8 @@ export default function App() {
     const volumeNeeded = drugBase / targetBase;
     if (volumeNeeded <= 0 || !isFinite(volumeNeeded)) { setError(t.errorInvalidResult); return; }
 
-    steps.push(`${t.calculate}: ${drugBase} mg ÷ ${targetBase} mg/mL = ${volumeNeeded.toFixed(2)} mL`);
+    const baseUnit = drugIsMass ? 'mg' : (drugUnit === 'mmol' ? 'mmol' : 'mEq');
+    steps.push(`${t.calculate}: ${drugBase} ${baseUnit} ÷ ${targetBase} ${baseUnit}/mL = ${volumeNeeded.toFixed(2)} mL`);
     const rounded = Math.round(volumeNeeded * 100) / 100;
     steps.push(`${t.roundNearest}: ${rounded} mL`);
     steps.push(`${t.addDiluent} ${rounded} mL`);
@@ -902,7 +904,7 @@ export default function App() {
       <div className="max-w-6xl mx-auto flex-1">
         <header className="mb-8">
           <div className="flex items-center justify-between flex-wrap gap-4">
-            <a href="https://pahtialabs.com" className="hover:opacity-80 transition">
+            <a href="https://pathialabs.com" className="hover:opacity-80 transition">
               <PahtiaLogo size="lg" />
             </a>
             <div className="flex items-center gap-4">
