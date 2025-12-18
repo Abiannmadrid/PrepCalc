@@ -1,5 +1,5 @@
 // DoseCalculatorForm.jsx - Form for dose calculation mode
-import InputRow from '../InputRow';
+import InputRow from './InputRow';
 import UnitSelector from './UnitSelector';
 import { isValidNumber, isValidPositiveNumber } from '../utils/validation';
 
