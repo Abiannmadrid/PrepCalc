@@ -170,97 +170,103 @@ export default function App() {
           </div>
         </header>
 
-        {/* Mode Selection */}
-        <div className="mb-6 flex justify-center">
-          <div className="bg-gray-800/90 p-1 rounded-xl inline-flex gap-1">
-            <button
-              onClick={() => { setMode("dose"); resetAll(); }}
-              className={`px-6 py-2 rounded-lg font-medium transition ${mode === "dose"
-                ? "bg-indigo-600 text-white"
+      {/* Mode Selection */}
+      <div className="mb-6 flex justify-center">
+        <div className="bg-gray-800/90 p-1 rounded-xl inline-flex gap-1">
+          <button
+            onClick={() => { setMode("dose"); resetAll(); }}
+            className={`px-6 py-2 rounded-lg font-medium transition ${
+              mode === "dose" 
+                ? "bg-indigo-600 text-white" 
                 : "text-gray-400 hover:text-gray-200"
-                }`}
-            >
-              {t.modeDose}
-            </button>
-            <button
-              onClick={() => { setMode("dilution"); resetAll(); }}
-              className={`px-6 py-2 rounded-lg font-medium transition ${mode === "dilution"
-                ? "bg-indigo-600 text-white"
+            }`}
+          >
+            {t.modeDose}
+          </button>
+          <button
+            onClick={() => { setMode("dilution"); resetAll(); }}
+            className={`px-6 py-2 rounded-lg font-medium transition ${
+              mode === "dilution" 
+                ? "bg-indigo-600 text-white" 
                 : "text-gray-400 hover:text-gray-200"
-                }`}
-            >
-              {t.modeDilution}
-            </button>
-            {/* ADD THIS BUTTON: */}
-            <button
-              onClick={() => { setMode("dripRate"); resetAll(); }}
-              className={`px-6 py-2 rounded-lg font-medium transition ${mode === "dripRate"
-                ? "bg-indigo-600 text-white"
+            }`}
+          >
+            {t.modeDilution}
+          </button>
+          <button
+            onClick={() => { setMode("dripRate"); resetAll(); }}
+            className={`px-6 py-2 rounded-lg font-medium transition ${
+              mode === "dripRate" 
+                ? "bg-indigo-600 text-white" 
                 : "text-gray-400 hover:text-gray-200"
-                }`}
-            >
-              {t.modeDripRate}
-            </button>
-          </div>
+            }`}
+          >
+            {t.modeDripRate}
+          </button>
         </div>
+      </div>
 
-        {/* Info Banner for Dilution Mode */}
-        {mode === "dilution" && (
-          <InfoBanner
-            title={t.dilutionInfoTitle}
-            text={t.dilutionInfoText}
-          />
-        )}
+      {/* Info Banner for Dilution Mode */}
+      {mode === "dilution" && (
+        <InfoBanner 
+          title={t.dilutionInfoTitle} 
+          text={t.dilutionInfoText} 
+        />
+      )}
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-          {/* Input Form */}
-          <section className="bg-gray-800/90 p-6 rounded-2xl border border-gray-700 shadow-lg">
-            {mode === "dose" ? (
-              <DoseCalculatorForm
-                vialStrength={vialStrength}
-                setVialStrength={setVialStrength}
-                vialUnit={vialUnit}
-                setVialUnit={setVialUnit}
-                vialVolume={vialVolume}
-                setVialVolume={setVialVolume}
-                desiredStrength={desiredStrength}
-                setDesiredStrength={setDesiredStrength}
-                desiredUnit={desiredUnit}
-                setDesiredUnit={setDesiredUnit}
-                onCalculate={handleDoseCalculation}
-                onReset={resetAll}
-                translations={t}
-              />
-            ) : mode === "dilution" ? (
-              <DilutionCalculatorForm
-                drugAmount={drugAmount}
-                setDrugAmount={setDrugAmount}
-                drugUnit={drugUnit}
-                setDrugUnit={setDrugUnit}
-                targetConcentration={targetConcentration}
-                setTargetConcentration={setTargetConcentration}
-                targetConcUnit={targetConcUnit}
-                setTargetConcUnit={setTargetConcUnit}
-                onCalculate={handleDilutionCalculation}
-                onReset={resetAll}
-                translations={t}
-              />
-            ) : (
-              /* ADD THIS ELSE BLOCK FOR DRIP RATE: */
-              <DripRateCalculatorForm
-                volume={volume}
-                setVolume={setVolume}
-                time={time}
-                setTime={setTime}
-                dropFactor={dropFactor}
-                setDropFactor={setDropFactor}
-                onCalculate={handleDripRateCalculation}
-                onReset={resetAll}
-                translations={t}
-              />
-            )}
-          </section>
+      {/* Main Content */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+        {/* Input Form */}
+        <section className="bg-gray-800/90 p-6 rounded-2xl border border-gray-700 shadow-lg">
+          {/* CRITICAL FIX: Use explicit mode checks, not else statements */}
+          {mode === "dose" && (
+            <DoseCalculatorForm
+              vialStrength={vialStrength}
+              setVialStrength={setVialStrength}
+              vialUnit={vialUnit}
+              setVialUnit={setVialUnit}
+              vialVolume={vialVolume}
+              setVialVolume={setVialVolume}
+              desiredStrength={desiredStrength}
+              setDesiredStrength={setDesiredStrength}
+              desiredUnit={desiredUnit}
+              setDesiredUnit={setDesiredUnit}
+              onCalculate={handleDoseCalculation}
+              onReset={resetAll}
+              translations={t}
+            />
+          )}
+          
+          {mode === "dilution" && (
+            <DilutionCalculatorForm
+              drugAmount={drugAmount}
+              setDrugAmount={setDrugAmount}
+              drugUnit={drugUnit}
+              setDrugUnit={setDrugUnit}
+              targetConcentration={targetConcentration}
+              setTargetConcentration={setTargetConcentration}
+              targetConcUnit={targetConcUnit}
+              setTargetConcUnit={setTargetConcUnit}
+              onCalculate={handleDilutionCalculation}
+              onReset={resetAll}
+              translations={t}
+            />
+          )}
+          
+          {mode === "dripRate" && (
+            <DripRateCalculatorForm
+              volume={volume}
+              setVolume={setVolume}
+              time={time}
+              setTime={setTime}
+              dropFactor={dropFactor}
+              setDropFactor={setDropFactor}
+              onCalculate={handleDripRateCalculation}
+              onReset={resetAll}
+              translations={t}
+            />
+          )}
+        </section>
 
           {/* Results Panel */}
           <aside className="bg-gray-800/95 border border-indigo-700 rounded-2xl shadow-lg p-6 flex flex-col justify-center items-center">
