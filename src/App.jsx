@@ -90,7 +90,28 @@ export default function App() {
       setError(t.errorDose);
       return;
     }
+    // Handle dilution calculation
+  const handleDilutionCalculation = () => {
+    setError("");
+    setResult(null);
+    setCalculationSteps([]);
 
+    const drug = Number(drugAmount);
+    const targetConc = Number(targetConcentration);
+
+    // Validation
+    if (!isValidNumber(drugAmount) || !isValidNumber(targetConcentration)) {
+      setError(t.errorNumeric);
+      return;
+    }
+    if (!isValidPositiveNumber(drugAmount)) {
+      setError(t.errorDrugAmount);
+      return;
+    }
+    if (!isValidPositiveNumber(targetConcentration)) {
+      setError(t.errorTargetConc);
+      return;
+    }
     // Perform calculation
     const calculationResult = calculateDose({
       vialStrength: vialS,
