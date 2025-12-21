@@ -36,6 +36,7 @@ export const calculateDripRate = ({
   
   return {
     result: {
+      type: "dripRate", // ADD THIS LINE
       dripsPerMinute: roundedDripRate,
       flowRate: flowRate,
       unit: "drops/min"

@@ -1,4 +1,4 @@
-// ResultDisplay.jsx - Display calculation results
+// ResultDisplay.jsx - Display calculation results (UPDATED with drip rate support)
 export default function ResultDisplay({ result, error, translations }) {
     if (error) {
       return (
@@ -10,6 +10,30 @@ export default function ResultDisplay({ result, error, translations }) {
   
     if (!result) {
       return <p className="text-gray-400">{translations.enterInputs}</p>;
+    }
+  
+    // Handle drip rate results
+    if (result.type === "dripRate") {
+      return (
+        <div 
+          className="w-full text-center p-6 rounded-2xl border border-indigo-600" 
+          style={{ background: "linear-gradient(145deg, #1f1f23, #2e2e41)" }}
+        >
+          <p className="text-sm text-gray-400">{translations.volumeToDraw}</p>
+          <p className="text-5xl font-extrabold text-indigo-400 mt-2">
+            {result.dripsPerMinute}
+          </p>
+          <p className="text-xl text-indigo-300 mt-1">{translations.dripsPerMin}</p>
+          
+          <div className="mt-4 pt-4 border-t border-gray-700">
+            <p className="text-sm text-gray-400">{translations.flowRate}</p>
+            <p className="text-2xl font-bold text-cyan-400 mt-1">
+              {result.flowRate} {translations.mlPerHour}
+            </p>
+          </div>
+          <p className="text-xs text-gray-500 mt-4">{translations.rounded}</p>
+        </div>
+      );
     }
   
     return (
