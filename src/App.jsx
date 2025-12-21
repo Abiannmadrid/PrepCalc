@@ -90,7 +90,27 @@ export default function App() {
       setError(t.errorDose);
       return;
     }
-    // Handle dilution calculation
+
+    // Perform calculation
+    const calculationResult = calculateDose({
+      vialStrength: vialS,
+      vialUnit,
+      vialVolume: vialV,
+      desiredStrength: desired,
+      desiredUnit,
+      translations: t,
+      language
+    });
+
+    if (calculationResult.error) {
+      setError(calculationResult.error);
+    } else {
+      setResult(calculationResult.result);
+      setCalculationSteps(calculationResult.steps);
+    }
+  };
+
+  // Handle dilution calculation
   const handleDilutionCalculation = () => {
     setError("");
     setResult(null);
@@ -112,13 +132,13 @@ export default function App() {
       setError(t.errorTargetConc);
       return;
     }
+
     // Perform calculation
-    const calculationResult = calculateDose({
-      vialStrength: vialS,
-      vialUnit,
-      vialVolume: vialV,
-      desiredStrength: desired,
-      desiredUnit,
+    const calculationResult = calculateDilution({
+      drugAmount: drug,
+      drugUnit,
+      targetConcentration: targetConc,
+      targetConcUnit,
       translations: t,
       language
     });
@@ -131,14 +151,16 @@ export default function App() {
     }
   };
 
-  // Handle dilution calculation
+  // Handle drip rate calculation
   const handleDripRateCalculation = () => {
     setError("");
     setResult(null);
     setCalculationSteps([]);
+
     const vol = Number(volume);
     const timeHours = Number(time);
     const dropF = Number(dropFactor);
+
     // Validation
     if (!isValidNumber(volume) || !isValidNumber(time) || !isValidNumber(dropFactor)) {
       setError(t.errorNumeric);
@@ -156,6 +178,7 @@ export default function App() {
       setError(t.errorInvalidResult);
       return;
     }
+
     // Perform calculation
     const calculationResult = calculateDripRate({
       volume: vol,
@@ -163,6 +186,7 @@ export default function App() {
       dropFactor: dropF,
       translations: t
     });
+
     if (calculationResult.error) {
       setError(calculationResult.error);
     } else {
@@ -170,7 +194,6 @@ export default function App() {
       setCalculationSteps(calculationResult.steps);
     }
   };
-  // 
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-gray-900 p-6 text-white flex flex-col">
@@ -191,105 +214,102 @@ export default function App() {
           </div>
         </header>
 
-      {/* Mode Selection */}
-      <div className="mb-6 flex justify-center">
-        <div className="bg-gray-800/90 p-1 rounded-xl inline-flex gap-1">
-          <button
-            onClick={() => { setMode("dose"); resetAll(); }}
-            className={`px-6 py-2 rounded-lg font-medium transition ${
-              mode === "dose" 
-                ? "bg-indigo-600 text-white" 
-                : "text-gray-400 hover:text-gray-200"
-            }`}
-          >
-            {t.modeDose}
-          </button>
-          <button
-            onClick={() => { setMode("dilution"); resetAll(); }}
-            className={`px-6 py-2 rounded-lg font-medium transition ${
-              mode === "dilution" 
-                ? "bg-indigo-600 text-white" 
-                : "text-gray-400 hover:text-gray-200"
-            }`}
-          >
-            {t.modeDilution}
-          </button>
-          <button
-            onClick={() => { setMode("dripRate"); resetAll(); }}
-            className={`px-6 py-2 rounded-lg font-medium transition ${
-              mode === "dripRate" 
-                ? "bg-indigo-600 text-white" 
-                : "text-gray-400 hover:text-gray-200"
-            }`}
-          >
-            {t.modeDripRate}
-          </button>
+        {/* Mode Selection */}
+        <div className="mb-6 flex justify-center">
+          <div className="bg-gray-800/90 p-1 rounded-xl inline-flex gap-1">
+            <button
+              onClick={() => { setMode("dose"); resetAll(); }}
+              className={`px-6 py-2 rounded-lg font-medium transition ${
+                mode === "dose" 
+                  ? "bg-indigo-600 text-white" 
+                  : "text-gray-400 hover:text-gray-200"
+              }`}
+            >
+              {t.modeDose}
+            </button>
+            <button
+              onClick={() => { setMode("dilution"); resetAll(); }}
+              className={`px-6 py-2 rounded-lg font-medium transition ${
+                mode === "dilution" 
+                  ? "bg-indigo-600 text-white" 
+                  : "text-gray-400 hover:text-gray-200"
+              }`}
+            >
+              {t.modeDilution}
+            </button>
+            <button
+              onClick={() => { setMode("dripRate"); resetAll(); }}
+              className={`px-6 py-2 rounded-lg font-medium transition ${
+                mode === "dripRate" 
+                  ? "bg-indigo-600 text-white" 
+                  : "text-gray-400 hover:text-gray-200"
+              }`}
+            >
+              {t.modeDripRate}
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Info Banner for Dilution Mode */}
-      {mode === "dilution" && (
-        <InfoBanner 
-          title={t.dilutionInfoTitle} 
-          text={t.dilutionInfoText} 
-        />
-      )}
+        {/* Info Banner for Dilution Mode */}
+        {mode === "dilution" && (
+          <InfoBanner 
+            title={t.dilutionInfoTitle} 
+            text={t.dilutionInfoText} 
+          />
+        )}
 
-      {/* Main Content */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-        {/* Input Form */}
-        <section className="bg-gray-800/90 p-6 rounded-2xl border border-gray-700 shadow-lg">
-          {/* CRITICAL FIX: Use explicit mode checks, not else statements */}
-          {mode === "dose" && (
-            <DoseCalculatorForm
-              vialStrength={vialStrength}
-              setVialStrength={setVialStrength}
-              vialUnit={vialUnit}
-              setVialUnit={setVialUnit}
-              vialVolume={vialVolume}
-              setVialVolume={setVialVolume}
-              desiredStrength={desiredStrength}
-              setDesiredStrength={setDesiredStrength}
-              desiredUnit={desiredUnit}
-              setDesiredUnit={setDesiredUnit}
-              onCalculate={handleDoseCalculation}
-              onReset={resetAll}
-              translations={t}
-            />
-          )}
-          
-          {mode === "dilution" && (
-            <DilutionCalculatorForm
-              drugAmount={drugAmount}
-              setDrugAmount={setDrugAmount}
-              drugUnit={drugUnit}
-              setDrugUnit={setDrugUnit}
-              targetConcentration={targetConcentration}
-              setTargetConcentration={setTargetConcentration}
-              targetConcUnit={targetConcUnit}
-              setTargetConcUnit={setTargetConcUnit}
-              onCalculate={handleDilutionCalculation}
-              onReset={resetAll}
-              translations={t}
-            />
-          )}
-          
-          {mode === "dripRate" && (
-            <DripRateCalculatorForm
-              volume={volume}
-              setVolume={setVolume}
-              time={time}
-              setTime={setTime}
-              dropFactor={dropFactor}
-              setDropFactor={setDropFactor}
-              onCalculate={handleDripRateCalculation}
-              onReset={resetAll}
-              translations={t}
-            />
-          )}
-        </section>
+        {/* Main Content */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+          <section className="bg-gray-800/90 p-6 rounded-2xl border border-gray-700 shadow-lg">
+            {mode === "dose" && (
+              <DoseCalculatorForm
+                vialStrength={vialStrength}
+                setVialStrength={setVialStrength}
+                vialUnit={vialUnit}
+                setVialUnit={setVialUnit}
+                vialVolume={vialVolume}
+                setVialVolume={setVialVolume}
+                desiredStrength={desiredStrength}
+                setDesiredStrength={setDesiredStrength}
+                desiredUnit={desiredUnit}
+                setDesiredUnit={setDesiredUnit}
+                onCalculate={handleDoseCalculation}
+                onReset={resetAll}
+                translations={t}
+              />
+            )}
 
-          {/* Results Panel */}
+            {mode === "dilution" && (
+              <DilutionCalculatorForm
+                drugAmount={drugAmount}
+                setDrugAmount={setDrugAmount}
+                drugUnit={drugUnit}
+                setDrugUnit={setDrugUnit}
+                targetConcentration={targetConcentration}
+                setTargetConcentration={setTargetConcentration}
+                targetConcUnit={targetConcUnit}
+                setTargetConcUnit={setTargetConcUnit}
+                onCalculate={handleDilutionCalculation}
+                onReset={resetAll}
+                translations={t}
+              />
+            )}
+
+            {mode === "dripRate" && (
+              <DripRateCalculatorForm
+                volume={volume}
+                setVolume={setVolume}
+                time={time}
+                setTime={setTime}
+                dropFactor={dropFactor}
+                setDropFactor={setDropFactor}
+                onCalculate={handleDripRateCalculation}
+                onReset={resetAll}
+                translations={t}
+              />
+            )}
+          </section>
+
           <aside className="bg-gray-800/95 border border-indigo-700 rounded-2xl shadow-lg p-6 flex flex-col justify-center items-center">
             <div className="w-full flex items-center justify-between mb-2">
               <h3 className="text-lg font-semibold text-gray-200">{t.result}</h3>
@@ -320,7 +340,6 @@ export default function App() {
         </div>
       </div>
 
-      {/* Footer */}
       <footer className="mt-10 py-4 text-center text-xs text-gray-500 opacity-70">
         <p>{t.footerDisclaimer}</p>
         <p>© {new Date().getFullYear()} {t.footerCopyright}</p>
@@ -328,3 +347,4 @@ export default function App() {
     </div>
   );
 }
+
