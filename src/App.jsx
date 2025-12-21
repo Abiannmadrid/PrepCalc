@@ -5,6 +5,8 @@ import { calculateDose } from './calculators/doseCalculator';
 import { calculateDilution } from './calculators/dilutionCalculator';
 import { isValidNumber, isValidPositiveNumber } from './utils/validation';
 import { useLocalStorage } from './utils/useLocalStorage';
+import { calculateDripRate } from './calculators/dripRateCalculator';
+import DripRateCalculatorForm from './components/DripRateCalculatorForm';
 
 // Components
 import PahtiaLogo from './components/PahtiaLogo';
@@ -19,7 +21,10 @@ export default function App() {
   // Language and UI preferences (persisted)
   const [language, setLanguage] = useLocalStorage("prepcalc-language", "en");
   const [showSteps, setShowSteps] = useLocalStorage("prepcalc-showSteps", false);
-  
+  const [volume, setVolume] = useState("");
+  const [time, setTime] = useState("");
+  const [dropFactor, setDropFactor] = useState("20");
+
   // Mode selection
   const [mode, setMode] = useState("dose");
 
@@ -54,6 +59,9 @@ export default function App() {
     setDrugUnit("mg");
     setTargetConcentration("");
     setTargetConcUnit("mg");
+    setVolume("");
+    setTime("");
+    setDropFactor("20");
     setResult(null);
     setError("");
     setCalculationSteps([]);
@@ -103,37 +111,37 @@ export default function App() {
   };
 
   // Handle dilution calculation
-  const handleDilutionCalculation = () => {
+  const handleDripRateCalculation = () => {
     setError("");
     setResult(null);
     setCalculationSteps([]);
-
-    const drug = Number(drugAmount);
-    const targetConc = Number(targetConcentration);
-
+    const vol = Number(volume);
+    const timeHours = Number(time);
+    const dropF = Number(dropFactor);
     // Validation
-    if (!isValidNumber(drugAmount) || !isValidNumber(targetConcentration)) {
+    if (!isValidNumber(volume) || !isValidNumber(time) || !isValidNumber(dropFactor)) {
       setError(t.errorNumeric);
       return;
     }
-    if (!isValidPositiveNumber(drugAmount)) {
-      setError(t.errorDrugAmount);
+    if (!isValidPositiveNumber(volume)) {
+      setError(t.errorVolume);
       return;
     }
-    if (!isValidPositiveNumber(targetConcentration)) {
-      setError(t.errorTargetConc);
+    if (!isValidPositiveNumber(time)) {
+      setError(t.errorInvalidResult);
       return;
     }
-
+    if (!isValidPositiveNumber(dropFactor)) {
+      setError(t.errorInvalidResult);
+      return;
+    }
     // Perform calculation
-    const calculationResult = calculateDilution({
-      drugAmount: drug,
-      drugUnit,
-      targetConcentration: targetConc,
-      targetConcUnit,
+    const calculationResult = calculateDripRate({
+      volume: vol,
+      time: timeHours,
+      dropFactor: dropF,
       translations: t
     });
-
     if (calculationResult.error) {
       setError(calculationResult.error);
     } else {
@@ -141,6 +149,7 @@ export default function App() {
       setCalculationSteps(calculationResult.steps);
     }
   };
+  // 
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-950 to-gray-900 p-6 text-white flex flex-col">
@@ -166,32 +175,40 @@ export default function App() {
           <div className="bg-gray-800/90 p-1 rounded-xl inline-flex gap-1">
             <button
               onClick={() => { setMode("dose"); resetAll(); }}
-              className={`px-6 py-2 rounded-lg font-medium transition ${
-                mode === "dose" 
-                  ? "bg-indigo-600 text-white" 
-                  : "text-gray-400 hover:text-gray-200"
-              }`}
+              className={`px-6 py-2 rounded-lg font-medium transition ${mode === "dose"
+                ? "bg-indigo-600 text-white"
+                : "text-gray-400 hover:text-gray-200"
+                }`}
             >
               {t.modeDose}
             </button>
             <button
               onClick={() => { setMode("dilution"); resetAll(); }}
-              className={`px-6 py-2 rounded-lg font-medium transition ${
-                mode === "dilution" 
-                  ? "bg-indigo-600 text-white" 
-                  : "text-gray-400 hover:text-gray-200"
-              }`}
+              className={`px-6 py-2 rounded-lg font-medium transition ${mode === "dilution"
+                ? "bg-indigo-600 text-white"
+                : "text-gray-400 hover:text-gray-200"
+                }`}
             >
               {t.modeDilution}
+            </button>
+            {/* ADD THIS BUTTON: */}
+            <button
+              onClick={() => { setMode("dripRate"); resetAll(); }}
+              className={`px-6 py-2 rounded-lg font-medium transition ${mode === "dripRate"
+                ? "bg-indigo-600 text-white"
+                : "text-gray-400 hover:text-gray-200"
+                }`}
+            >
+              {t.modeDripRate}
             </button>
           </div>
         </div>
 
         {/* Info Banner for Dilution Mode */}
         {mode === "dilution" && (
-          <InfoBanner 
-            title={t.dilutionInfoTitle} 
-            text={t.dilutionInfoText} 
+          <InfoBanner
+            title={t.dilutionInfoTitle}
+            text={t.dilutionInfoText}
           />
         )}
 
@@ -215,7 +232,7 @@ export default function App() {
                 onReset={resetAll}
                 translations={t}
               />
-            ) : (
+            ) : mode === "dilution" ? (
               <DilutionCalculatorForm
                 drugAmount={drugAmount}
                 setDrugAmount={setDrugAmount}
@@ -226,6 +243,19 @@ export default function App() {
                 targetConcUnit={targetConcUnit}
                 setTargetConcUnit={setTargetConcUnit}
                 onCalculate={handleDilutionCalculation}
+                onReset={resetAll}
+                translations={t}
+              />
+            ) : (
+              /* ADD THIS ELSE BLOCK FOR DRIP RATE: */
+              <DripRateCalculatorForm
+                volume={volume}
+                setVolume={setVolume}
+                time={time}
+                setTime={setTime}
+                dropFactor={dropFactor}
+                setDropFactor={setDropFactor}
+                onCalculate={handleDripRateCalculation}
                 onReset={resetAll}
                 translations={t}
               />
@@ -247,16 +277,16 @@ export default function App() {
               </label>
             </div>
 
-            <ResultDisplay 
-              result={result} 
-              error={error} 
-              translations={t} 
+            <ResultDisplay
+              result={result}
+              error={error}
+              translations={t}
             />
 
             {showSteps && (
-              <CalculationSteps 
-                steps={calculationSteps} 
-                title={t.stepByStep} 
+              <CalculationSteps
+                steps={calculationSteps}
+                title={t.stepByStep}
               />
             )}
           </aside>
