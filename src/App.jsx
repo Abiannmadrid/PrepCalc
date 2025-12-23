@@ -24,6 +24,7 @@ export default function App() {
   const [volume, setVolume] = useState("");
   const [time, setTime] = useState("");
   const [dropFactor, setDropFactor] = useState("20");
+  const [timeUnit, setTimeUnit] = useState("hours");
 
   // Mode selection
   const [mode, setMode] = useState("dose");
@@ -62,6 +63,7 @@ export default function App() {
     setVolume("");
     setTime("");
     setDropFactor("20");
+    setTimeUnit("hours");
     setResult(null);
     setError("");
     setCalculationSteps([]);
@@ -158,7 +160,7 @@ export default function App() {
     setCalculationSteps([]);
 
     const vol = Number(volume);
-    const timeHours = Number(time);
+    const timeValue = Number(time);
     const dropF = Number(dropFactor);
 
     // Validation
@@ -182,7 +184,8 @@ export default function App() {
     // Perform calculation
     const calculationResult = calculateDripRate({
       volume: vol,
-      time: timeHours,
+      time: timeValue,
+      timeUnit: timeUnit,
       dropFactor: dropF,
       translations: t
     });
@@ -301,6 +304,8 @@ export default function App() {
                 setVolume={setVolume}
                 time={time}
                 setTime={setTime}
+                timeUnit={timeUnit}
+                setTimeUnit={setTimeUnit}
                 dropFactor={dropFactor}
                 setDropFactor={setDropFactor}
                 onCalculate={handleDripRateCalculation}

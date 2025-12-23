@@ -1,44 +1,49 @@
-// calculators/dripRateCalculator.js
+// calculators/dripRateCalculator.js - UPDATED with time units and no rounding
 import { isValidResult } from '../utils/validation';
 
 export const calculateDripRate = ({
   volume,
   time,
+  timeUnit,
   dropFactor,
   translations
 }) => {
   const steps = [];
   
-  steps.push(`${translations.given}: ${volume} mL, ${time} hours, ${dropFactor} drops/mL`);
+  // Convert time to minutes if needed
+  let timeInMinutes;
+  if (timeUnit === 'hours') {
+    timeInMinutes = time * 60;
+    steps.push(`${translations.given}: ${volume} mL, ${time} hours, ${dropFactor} drops/mL`);
+    steps.push(`${translations.convertTime}: ${time} hours × 60 = ${timeInMinutes} minutes`);
+  } else {
+    timeInMinutes = time;
+    steps.push(`${translations.given}: ${volume} mL, ${time} minutes, ${dropFactor} drops/mL`);
+  }
   
-  // Step 1: Convert time to minutes
-  const timeInMinutes = time * 60;
-  steps.push(`${translations.convertTime}: ${time} hours × 60 = ${timeInMinutes} minutes`);
-  
-  // Step 2: Calculate total drops
+  // Calculate total drops
   const totalDrops = volume * dropFactor;
   steps.push(`${translations.totalDrops}: ${volume} mL × ${dropFactor} drops/mL = ${totalDrops} drops`);
   
-  // Step 3: Calculate drip rate
+  // Calculate drip rate (NO ROUNDING)
   const dripsPerMinute = totalDrops / timeInMinutes;
-  const roundedDripRate = Math.round(dripsPerMinute);
   
-  if (!isValidResult(roundedDripRate)) {
+  if (!isValidResult(dripsPerMinute)) {
     return { error: translations.errorInvalidResult };
   }
   
   steps.push(`${translations.dripRate}: ${totalDrops} drops ÷ ${timeInMinutes} minutes = ${dripsPerMinute.toFixed(2)} drops/min`);
-  steps.push(`${translations.rounded}: ${roundedDripRate} drops/min`);
   
-  // Step 4: Calculate flow rate for verification
-  const flowRate = Math.round(volume / time);
-  steps.push(`${translations.flowRate}: ${volume} mL ÷ ${time} hours = ${flowRate} mL/hr`);
+  // Calculate flow rate for verification
+  const timeInHours = timeUnit === 'hours' ? time : time / 60;
+  const flowRate = volume / timeInHours;
+  steps.push(`${translations.flowRate}: ${volume} mL ÷ ${timeInHours.toFixed(2)} hours = ${flowRate.toFixed(2)} mL/hr`);
   
   return {
     result: {
-      type: "dripRate", // ADD THIS LINE
-      dripsPerMinute: roundedDripRate,
-      flowRate: flowRate,
+      type: "dripRate",
+      dripsPerMinute: dripsPerMinute.toFixed(2), // Keep 2 decimal places but don't round to whole number
+      flowRate: flowRate.toFixed(2),
       unit: "drops/min"
     },
     steps

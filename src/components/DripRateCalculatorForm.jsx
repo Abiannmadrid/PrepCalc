@@ -1,4 +1,4 @@
-// components/DripRateCalculatorForm.jsx
+// components/DripRateCalculatorForm.jsx - UPDATED with time unit selection
 import InputRow from './InputRow';
 import { isValidNumber } from '../utils/validation';
 
@@ -7,6 +7,8 @@ export default function DripRateCalculatorForm({
   setVolume,
   time,
   setTime,
+  timeUnit,
+  setTimeUnit,
   dropFactor,
   setDropFactor,
   onCalculate,
@@ -33,16 +35,38 @@ export default function DripRateCalculatorForm({
         <span className="px-3 text-gray-400">mL</span>
       </InputRow>
 
-      <InputRow
-        label={translations.time}
-        value={time}
-        onChange={setTime}
-        invalid={time && !isValidNumber(time)}
-        tooltip={translations.tooltipTime}
-        placeholder="8"
-      >
-        <span className="px-3 text-gray-400">hours</span>
-      </InputRow>
+      {/* TIME INPUT WITH UNIT SELECTOR */}
+      <div className="mb-6">
+        <label className="block text-sm font-semibold text-gray-200 mb-2 flex items-center gap-2">
+          {translations.time}
+          {translations.tooltipTime && (
+            <span className="text-gray-500 text-xs cursor-help" title={translations.tooltipTime}>
+              ⓘ
+            </span>
+          )}
+        </label>
+        <div className="flex gap-2">
+          <input
+            type="number"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+            className={`flex-1 p-3 rounded-xl bg-gray-900 border transition ${
+              time && !isValidNumber(time)
+                ? 'border-red-500'
+                : 'border-gray-600 focus:border-indigo-500'
+            } text-white outline-none`}
+            placeholder="8"
+          />
+          <select
+            value={timeUnit}
+            onChange={(e) => setTimeUnit(e.target.value)}
+            className="px-4 py-3 rounded-xl bg-gray-900 border border-gray-600 text-white outline-none focus:border-indigo-500 cursor-pointer"
+          >
+            <option value="hours">{translations.hours || 'hours'}</option>
+            <option value="minutes">{translations.minutes || 'minutes'}</option>
+          </select>
+        </div>
+      </div>
 
       <div className="mb-6">
         <label className="block text-sm font-semibold text-gray-200 mb-3">
