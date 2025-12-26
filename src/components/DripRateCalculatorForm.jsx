@@ -1,4 +1,4 @@
-// components/DripRateCalculatorForm.jsx - UPDATED with time unit selection
+// components/DripRateCalculatorForm.jsx -
 import InputRow from './InputRow';
 import { isValidNumber } from '../utils/validation';
 
@@ -50,7 +50,7 @@ export default function DripRateCalculatorForm({
             type="number"
             value={time}
             onChange={(e) => setTime(e.target.value)}
-            className={`flex-1 p-3 rounded-xl bg-gray-900 border transition ${
+            className={`flex-1 min-w-0 p-3 rounded-xl bg-gray-900 border transition ${
               time && !isValidNumber(time)
                 ? 'border-red-500'
                 : 'border-gray-600 focus:border-indigo-500'
@@ -60,7 +60,7 @@ export default function DripRateCalculatorForm({
           <select
             value={timeUnit}
             onChange={(e) => setTimeUnit(e.target.value)}
-            className="px-4 py-3 rounded-xl bg-gray-900 border border-gray-600 text-white outline-none focus:border-indigo-500 cursor-pointer"
+            className="w-24 px-2 py-3 rounded-xl bg-gray-900 border border-gray-600 text-white outline-none focus:border-indigo-500 cursor-pointer text-sm"
           >
             <option value="hours">{translations.hours || 'hours'}</option>
             <option value="minutes">{translations.minutes || 'minutes'}</option>
